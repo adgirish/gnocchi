@@ -63,6 +63,8 @@ class GnocchiContext private[sql] (@transient sqlContext: SQLContext) extends Se
       filteredGtFrame("variant.end").as("end"),
       filteredGtFrame("variant.referenceAllele").as("ref"),
       filteredGtFrame("variant.alternateAllele").as("alt"),
+      // Preserving annotation data in conversion from Genotype to GenotypeState
+      filteredGtFrame("variant.annotation.transcriptEffects").as("annotation"),
       filteredGtFrame("sampleId"),
       genotypeState.as("genotypeState"),
       missingGenotypes.as("missingGenotypes"))

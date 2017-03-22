@@ -235,6 +235,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       genotypeStates("alt"),
       genotypeStates("sampleId"),
       genotypeStates("genotypeState"),
+      genotypeStates("annotation"),
       genotypeStates("missingGenotypes"))
 
     /*
