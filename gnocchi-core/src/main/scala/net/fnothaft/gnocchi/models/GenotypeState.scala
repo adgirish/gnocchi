@@ -44,6 +44,7 @@ case class GenotypeState(contigName: String,
                          ref: String,
                          alt: String,
                          sampleId: String,
+                         ann: String,
                          genotypeState: Int,
                          missingGenotypes: Int) {
 

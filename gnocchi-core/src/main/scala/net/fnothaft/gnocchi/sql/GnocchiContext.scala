@@ -66,7 +66,9 @@ class GnocchiContext private[sql] (@transient sqlContext: SQLContext) extends Se
       filteredGtFrame("variant.referenceAllele").as("ref"),
       filteredGtFrame("variant.alternateAllele").as("alt"),
       filteredGtFrame("sampleId"),
+      filteredGtFrame("variant.annotation.transcriptEffects.geneName").as("ann"),
       genotypeState.as("genotypeState"),
       missingGenotypes.as("missingGenotypes"))
+
   }
 }

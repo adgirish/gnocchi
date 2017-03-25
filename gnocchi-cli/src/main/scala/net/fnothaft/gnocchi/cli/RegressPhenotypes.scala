@@ -140,6 +140,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     // loads ADAM-formatted parquet data and creates dataset of GenotypeStates
     import sqlContext.implicits._
     val genotypes = sqlContext.read.format("parquet").load(parquetInputDestination)
+
     val genotypeStates = sqlContext
       .toGenotypeStateDataFrame(genotypes, args.ploidy, sparse = false)
     val genoStatesWithNames = genotypeStates.select(concat($"contigName", lit("_"), $"end", lit("_"), $"alt") as "contigName",
@@ -148,6 +149,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       genotypeStates("ref"),
       genotypeStates("alt"),
       genotypeStates("sampleId"),
+      genotypeStates("ann"),
       genotypeStates("genotypeState"),
       genotypeStates("missingGenotypes"))
 
@@ -158,6 +160,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     val mindDF = sqlContext.sql("SELECT sampleId FROM genotypeStates GROUP BY sampleId HAVING SUM(missingGenotypes)/(COUNT(sampleId)*2) <= %s".format(args.mind))
     // TODO: Resolve with "IN" sql command once spark2.0 is integrated
     val filteredGenotypeStates = genoStatesWithNames.filter(($"sampleId").isin(mindDF.collect().map(r => r(0)): _*))
+
     filteredGenotypeStates.as[GenotypeState]
   }
 
