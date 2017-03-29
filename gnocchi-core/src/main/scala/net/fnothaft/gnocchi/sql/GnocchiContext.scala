@@ -60,13 +60,15 @@ class GnocchiContext private[sql] (@transient sqlContext: SQLContext) extends Se
       c
     }).reduce(_ + _)
 
+    filteredGtFrame.printSchema()
+
     filteredGtFrame.select(filteredGtFrame("variant.contigName").as("contigName"),
       filteredGtFrame("variant.start").as("start"),
       filteredGtFrame("variant.end").as("end"),
       filteredGtFrame("variant.referenceAllele").as("ref"),
       filteredGtFrame("variant.alternateAllele").as("alt"),
       filteredGtFrame("sampleId"),
-      filteredGtFrame("variant.annotation.transcriptEffects.geneName").as("ann"),
+      filteredGtFrame("variant.annotation.transcriptEffects.featureType").as("ann"),
       genotypeState.as("genotypeState"),
       missingGenotypes.as("missingGenotypes"))
 

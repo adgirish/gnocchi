@@ -17,6 +17,8 @@
  */
 package net.fnothaft.gnocchi.models
 
+import org.apache.spark.sql.catalyst.util.GenericArrayData
+import org.apache.spark.sql.types.{ DataType, ArrayType }
 import org.bdgenomics.adam.models.ReferenceRegion
 import org.bdgenomics.formats.avro.{ Contig, Variant }
 
