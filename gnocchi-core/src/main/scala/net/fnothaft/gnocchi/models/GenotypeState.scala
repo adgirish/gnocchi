@@ -40,14 +40,30 @@ import org.bdgenomics.formats.avro.{ Contig, Variant }
  *                      0, 1 or 2, meaning ploidy is 2 and there is only one ref value and one alt value.
  * @param missingGenotypes Number of genotypes that are marked as missing
  */
+
 case class GenotypeState(contigName: String,
                          start: Long,
                          end: Long,
                          ref: String,
                          alt: String,
                          sampleId: String,
-                         ann: String,
-                         genotypeState: Int,
+                         ancestralAllele: Option[String],
+                         alleleCount: Option[Integer],
+                         readDepth: Option[Integer],
+                         forwardReadDepth: Option[Integer],
+                         reverseReadDepth: Option[Integer],
+                         referenceReadDepth: Option[Integer],
+                         referenceForwardReadDepth: Option[Integer],
+                         referenceReverseReadDepth: Option[Integer],
+                         alleleFrequency: Option[Float],
+                         cigar: Option[String],
+                         dbSnp: Option[Boolean],
+                         hapMap2: Option[Boolean],
+                         hapMap3: Option[Boolean],
+                         validated: Option[Boolean],
+                         thousandGenomes: Option[Boolean],
+                         somatic: Option[Boolean],
+                         genotypeState: Double,
                          missingGenotypes: Int) {
 
   def referenceAllele: (ReferenceRegion, String) = {
