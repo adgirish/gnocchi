@@ -5,11 +5,14 @@ import java.nio.file.Files
 
 import net.fnothaft.gnocchi.GnocchiFunSuite
 import net.fnothaft.gnocchi.models.GenotypeState
+import net.fnothaft.gnocchi.sql.GnocchiContext
 import org.apache.commons.io.FileUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{ Dataset, SQLContext }
 import org.bdgenomics.adam.cli.Vcf2ADAM
+import org.bdgenomics.adam.rdd.ADAMContext
+import org.bdgenomics.adam.rdd.ADAMContext._
 
 class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
   sparkTest("Processing in annotated VCFfile from snpEff") {
@@ -26,7 +29,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
 
     assert(genotypeStateArray.length == 15)
 
-    for (i <- List.range(0, 15, 1)) {
+    for (i <- List.range(0, 15, 3)) {
       println("Row ", i)
       var gs = genotypeStateArray(i)
       println(gs.ancestralAllele)
@@ -67,6 +70,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
       println(gs.transcriptEffectsMessages.get.mkString(", "))
       println("-------")
     }
+
   }
 }
 
