@@ -26,7 +26,9 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
 
     assert(genotypeStateArray.length == 15)
 
-    for (gs <- genotypeStateArray) {
+    for (i <- List.range(0, 15, 1)) {
+      println("Row ", i)
+      var gs = genotypeStateArray(i)
       println(gs.ancestralAllele)
       println(gs.alleleCount)
       println(gs.readDepth)
@@ -43,70 +45,28 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
       println(gs.validated)
       println(gs.thousandGenomes)
       println(gs.somatic)
+      println(gs.transcriptEffectsAlternateAllele.get.mkString(", "))
+      println(gs.transcriptEffectsEffects.get.mkString(", "))
+      println(gs.transcriptEffectsGeneName.get.mkString(", "))
+      println(gs.transcriptEffectsGeneId.get.mkString(", "))
+      println(gs.transcriptEffectsFeatureType.get.mkString(", "))
+      println(gs.transcriptEffectsFeatureId.get.mkString(", "))
+      println(gs.transcriptEffectsBiotype.get.mkString(", "))
+      println(gs.transcriptEffectsRank.get.mkString(", "))
+      println(gs.transcriptEffectsTotal.get.mkString(", "))
+      println(gs.transcriptEffectsGenomicHgvs.get.mkString(", "))
+      println(gs.transcriptEffectsTranscriptHgvs.get.mkString(", "))
+      println(gs.transcriptEffectsProteinHgvs.get.mkString(", "))
+      println(gs.transcriptEffectsCdnaPosition.get.mkString(", "))
+      println(gs.transcriptEffectsCdnaLength.get.mkString(", "))
+      println(gs.transcriptEffectsCdsPosition.get.mkString(", "))
+      println(gs.transcriptEffectsCdsLength.get.mkString(", "))
+      println(gs.transcriptEffectsProteinPosition.get.mkString(", "))
+      println(gs.transcriptEffectsProteinLength.get.mkString(", "))
+      println(gs.transcriptEffectsDistance.get.mkString(", "))
+      println(gs.transcriptEffectsMessages.get.mkString(", "))
       println("-------")
     }
   }
 }
-//  def run(sc: SparkContext) {
-//    val genotypeStates = loadGenotypes(sc)
-//  }
-//
-//  def loadGenotypes(sc: SparkContext): Dataset[GenotypeState] = {
-//    // set up sqlContext
-//    val sqlContext = SQLContext.getOrCreate(sc)
-//
-//
-//    val vcfPath = testFile("small_snpeff.vcf")
-//    val posAndIds = GetVariantIds(sc, vcfPath)
-//    //    if (args.getIds) {
-//    //      val mapPath = args.mapFile
-//    //      val oldName = new File(args.genotypes).getAbsolutePath.split("/").reverse(0)
-//    //      val newVCFPath = new File(args.genotypes).getAbsolutePath.split("/").reverse.drop(1).reverse.mkString("/") + "withIds_" + oldName
-//    //      val outpath = newVCFPath
-//    //      GetVariantIds(sc, vcfPath)
-//    //      vcfPath = outpath
-//    //    }
-//
-//    // check for ADAM formatted version of the file specified in genotypes. If it doesn't exist, convert vcf to parquet using vcf2adam.
-//    if (!parquetFiles.getAbsoluteFile.exists) {
-//      val cmdLine: Array[String] = Array[String](vcfPath, parquetInputDestination)
-//      Vcf2ADAM(cmdLine).run(sc)
-//    } else if (args.overwrite) {
-//      FileUtils.deleteDirectory(parquetFiles)
-//      val cmdLine: Array[String] = Array[String](vcfPath, parquetInputDestination)
-//      Vcf2ADAM(cmdLine).run(sc)
-//    }
-//
-//    // read in parquet files
-//    import sqlContext.implicits._
-//    //    val genotypes = sqlContext.read.parquet(parquetInputDestination)
-//    val genotypes = sqlContext.read.format("parquet").load(parquetInputDestination)
-//    //    val genotypes = sc.loadGenotypes(parquetInputDestination).toDF()
-//    // transform the parquet-formatted genotypes into a dataFrame of GenotypeStates and convert to Dataset.
-//    val genotypeStates = sqlContext
-//      .toGenotypeStateDataFrame(genotypes, args.ploidy, sparse = false)
-//    val genoStatesWithNames = genotypeStates.select(concat($"contig", lit("_"), $"end", lit("_"), $"alt") as "contig",
-//      genotypeStates("start"),
-//      genotypeStates("end"),
-//      genotypeStates("ref"),
-//      genotypeStates("alt"),
-//      genotypeStates("sampleId"),
-//      genotypeStates("genotypeState"),
-//      genotypeStates("missingGenotypes"))
-//
-//
-//
-//    // mind filter
-//    genoStatesWithNames.registerTempTable("genotypeStates")
-//
-//    val mindDF = sqlContext.sql("SELECT sampleId FROM genotypeStates GROUP BY sampleId HAVING SUM(missingGenotypes)/(COUNT(sampleId)*2) <= %s".format(args.mind))
-//    // TODO: Resolve with "IN" sql command once spark2.0 is integrated
-//    val filteredGenotypeStates = genoStatesWithNames.filter(($"sampleId").isin(mindDF.collect().map(r => r(0)): _*))
-//    val postFilter = filteredGenotypeStates.as[GenotypeState].rdd.take(10).toList
-//    println("\n\n\n\n\n\n")
-//    println(postFilter)
-//    println("\n\n\n\n\n\n")
-//
-//    filteredGenotypeStates.as[GenotypeState]
-//  }
 
