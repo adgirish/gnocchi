@@ -65,8 +65,36 @@ class GnocchiContext private[sql] (@transient sqlContext: SQLContext) extends Se
       filteredGtFrame("variant.end").as("end"),
       filteredGtFrame("variant.referenceAllele").as("ref"),
       filteredGtFrame("variant.alternateAllele").as("alt"),
+      filteredGtFrame("variant.annotation").as("ann"),
       filteredGtFrame("sampleId"),
       genotypeState.as("genotypeState"),
       missingGenotypes.as("missingGenotypes"))
   }
+
+  def toGenotypeDataFrame(gtFrame: DataFrame, ploidy: Int, sparse: Boolean = false): DataFrame = {
+
+    val filteredGtFrame = if (sparse) {
+      // if we want the sparse representation, we prefilter
+      val sparseFilter = (0 until ploidy).map(i => {
+        gtFrame("alleles").getItem(i) !== "Ref"
+      }).reduce(_ || _)
+      gtFrame.filter(sparseFilter)
+    } else {
+      gtFrame
+    }
+
+    // generate expression
+    val genotypeState = (0 until ploidy).map(i => {
+      val c: Column = when(filteredGtFrame("alleles").getItem(i) === "REF", 1).otherwise(0)
+      c
+    }).reduce(_ + _)
+
+    val missingGenotypes = (0 until ploidy).map(i => {
+      val c: Column = when(filteredGtFrame("alleles").getItem(i) === "NO_CALL", 1).otherwise(0)
+      c
+    }).reduce(_ + _)
+
+    filteredGtFrame.select(filteredGtFrame("variant.annotation").as("ann"))
+  }
+
 }
