@@ -41,10 +41,10 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(genotypeRDD.first._2.getThousandGenomes === null)
     assert(genotypeRDD.first._2.getSomatic === false)
 
-    //    for (gt <- genotypeRDD) {
-    //      println(gt.toString)
-    //      println()
-    //    }
+    for (gt <- genotypeRDD) {
+      println(gt.toString)
+      println()
+    }
   }
 
 }

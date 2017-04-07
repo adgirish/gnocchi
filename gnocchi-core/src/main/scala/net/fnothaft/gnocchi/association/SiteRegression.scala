@@ -58,16 +58,22 @@ trait SiteRegression extends Serializable {
       variant.setAlternateAllele(gs.alt)
       variant.setNames(Seq())
       variant.setFiltersFailed(Seq())
-      ((variant, pheno.phenotype), genoPheno)
+      // OLD: ((variant, pheno.phenotype), genoPheno) -> ((Variant, String), (GenotypeState, Phenotype))
+      (variant, genoPheno)
     })
       .groupByKey()
 
     keyedGenoPheno.map(site => {
-      val ((variant, pheno), observations) = site
+      // OLD: site -> ((Variant, String), Iterable(GenotypeState, Phenotype))
+      // OLD: val ((variant, pheno), observations) = site
+      val (variant, observations) = site
       val formattedObvs = observations.map(p => {
         val (genotypeState, phenotype) = p
         (clipOrKeepState(genotypeState), phenotype.toDouble)
       }).toArray
+
+      // (TODO) Find cleaner way to write this
+      val pheno = observations.toList(0)._2.phenotype
       regressSite(formattedObvs, variant, pheno)
     })
   }
