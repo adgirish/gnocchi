@@ -13,7 +13,7 @@ import org.apache.spark.sql.{ Dataset, SQLContext }
 import org.bdgenomics.adam.cli.Vcf2ADAM
 import org.bdgenomics.adam.rdd.ADAMContext
 import org.bdgenomics.adam.rdd.ADAMContext._
-import org.bdgenomics.formats.avro.{Genotype, Variant}
+import org.bdgenomics.formats.avro.{ Genotype, Variant }
 
 class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
   sparkTest("Processing in annotated VCFfile from snpEff") {
@@ -29,13 +29,28 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     val genotypeRDD = RegressPhenotypes(cliArgs).loadAnnotations(sc)
     val genotypeStateArray = genotypeStateDataset.collect()
 
-    assert(genotypeStateArray.length == 15)
+    assert(genotypeStateArray.length === 15)
+    assert(genotypeRDD.count === 5)
 
-    for (gt <- genotypeRDD) {
-      println(gt.getVariant)
-    }
-    //    for (i <- 0 to 14 by 3) {
-    //      println(genotypeRDD.zipWithIndex.filter(_._2 == i).map(_._1).first())
+    assert(genotypeRDD.first._2.getAncestralAllele === null)
+    assert(genotypeRDD.first._2.getAlleleCount === 2)
+    assert(genotypeRDD.first._2.getReadDepth === null)
+    assert(genotypeRDD.first._2.getForwardReadDepth === null)
+    assert(genotypeRDD.first._2.getReverseReadDepth === null)
+    assert(genotypeRDD.first._2.getReferenceReadDepth === null)
+    assert(genotypeRDD.first._2.getReferenceForwardReadDepth === null)
+    assert(genotypeRDD.first._2.getReferenceReverseReadDepth === null)
+    assert(genotypeRDD.first._2.getAlleleFrequency === 0.333f)
+    assert(genotypeRDD.first._2.getCigar === null)
+    assert(genotypeRDD.first._2.getDbSnp === null)
+    assert(genotypeRDD.first._2.getHapMap2 === null)
+    assert(genotypeRDD.first._2.getHapMap3 === null)
+    assert(genotypeRDD.first._2.getValidated === null)
+    assert(genotypeRDD.first._2.getThousandGenomes === null)
+    assert(genotypeRDD.first._2.getSomatic === false)
+
+    //    for (gt <- genotypeRDD) {
+    //      println(gt.toString)
     //      println()
     //    }
   }

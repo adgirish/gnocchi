@@ -32,8 +32,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.{ concat, lit }
-import org.bdgenomics.formats.avro.VariantAnnotation
-import org.bdgenomics.formats.avro.Genotype
+import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant, Genotype }
 import net.fnothaft.gnocchi.models.{ Phenotype, Association, AuxEncoders }
 import org.apache.spark.sql.Row
 
@@ -152,7 +151,6 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       genotypeStates("end"),
       genotypeStates("ref"),
       genotypeStates("alt"),
-      genotypeStates("ann"),
       genotypeStates("sampleId"),
       genotypeStates("genotypeState"),
       genotypeStates("missingGenotypes"))
@@ -174,7 +172,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
    * @param sc The spark context in which Gnocchi is running.
    * @return A RDD of VariantAnnotation objects.
    */
-  def loadAnnotations(sc: SparkContext): RDD[Genotype] = {
+  def loadAnnotations(sc: SparkContext): RDD[(Variant, VariantAnnotation)] = {
     // sets up sqlContext
     val sqlContext = SQLContext.getOrCreate(sc)
 
@@ -198,22 +196,9 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     // Trying to use ADAM Parquet loader
     val ac = new ADAMContext(sc)
     val fromADAMParquet = ac.loadParquet[Genotype](parquetInputDestination) //ac.loadParquet[VariantContext](parquetInputDestination)
-    fromADAMParquet
+    val uniqueVariants = fromADAMParquet.map(gt => gt.getVariant).distinct()
 
-    // loads ADAM-formatted parquet data and creates dataset of GenotypeStates
-    //    import sqlContext.implicits._
-    //    val genotypes = sqlContext.read.format("parquet").load(parquetInputDestination)
-    //    val genotypeDF = sqlContext
-    //      .toGenotypeStateDataFrame(genotypes, args.ploidy, sparse = false)
-    //    genotypeDF.as[Genotype]
-    // TODO: MAF, geno filters.
-
-    // filters samples with missingness per individaul greater than args.mind
-    //    genoStatesWithNames.registerTempTable("genotypeStates")
-    //    val mindDF = sqlContext.sql("SELECT sampleId FROM genotypeStates GROUP BY sampleId HAVING SUM(missingGenotypes)/(COUNT(sampleId)*2) <= %s".format(args.mind))
-    //    // TODO: Resolve with "IN" sql command once spark2.0 is integrated
-    //    val filteredGenotypeStates = genoStatesWithNames.filter(($"sampleId").isin(mindDF.collect().map(r => r(0)): _*))
-    //    filteredGenotypeStates.as[VariantAnnotation].rdd
+    uniqueVariants.map(v => (v, v.getAnnotation))
   }
 
   /**
