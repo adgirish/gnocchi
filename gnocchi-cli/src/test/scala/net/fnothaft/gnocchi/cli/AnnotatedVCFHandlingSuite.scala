@@ -4,18 +4,9 @@ package net.fnothaft.gnocchi.cli
 import java.nio.file.Files
 
 import net.fnothaft.gnocchi.GnocchiFunSuite
-import net.fnothaft.gnocchi.models.GenotypeState
-import net.fnothaft.gnocchi.sql.GnocchiContext
-import org.apache.commons.io.FileUtils
-import org.apache.spark.SparkContext
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{ Dataset, SQLContext }
-import org.bdgenomics.adam.cli.Vcf2ADAM
-import org.bdgenomics.adam.rdd.ADAMContext
-import org.bdgenomics.adam.rdd.ADAMContext._
-import org.bdgenomics.formats.avro.{ Genotype, Variant }
 
 class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
+
   sparkTest("Processing in annotated VCFfile from snpEff") {
     val path = "src/test/resources/testData/AnnotatedVCFHandlingSuite"
     val destination = Files.createTempDirectory("").toAbsolutePath.toString + "/" + path
@@ -26,8 +17,9 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     val cliArgs = cliCall.split(" ").drop(2)
 
     val genotypeStateDataset = RegressPhenotypes(cliArgs).loadGenotypes(sc)
-    val genotypeRDD = RegressPhenotypes(cliArgs).loadAnnotations(sc)
     val genotypeStateArray = genotypeStateDataset.collect()
+
+    val genotypeRDD = RegressPhenotypes(cliArgs).loadAnnotations(sc)
 
     assert(genotypeStateArray.length === 15)
     assert(genotypeRDD.count === 5)
@@ -54,4 +46,5 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     //      println()
     //    }
   }
+
 }

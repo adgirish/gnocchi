@@ -173,9 +173,6 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
    * @return A RDD of VariantAnnotation objects.
    */
   def loadAnnotations(sc: SparkContext): RDD[(Variant, VariantAnnotation)] = {
-    // sets up sqlContext
-    val sqlContext = SQLContext.getOrCreate(sc)
-
     /*
      * Checks for existance of ADAM-formatted parquet files in output directory
      * Creates them if none exist.
@@ -193,11 +190,12 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       Vcf2ADAM(cmdLine).run(sc)
     }
 
-    // Trying to use ADAM Parquet loader
+    // Uses ADAM's parquet loader to construct RDD of Genotypes
     val ac = new ADAMContext(sc)
     val fromADAMParquet = ac.loadParquet[Genotype](parquetInputDestination) //ac.loadParquet[VariantContext](parquetInputDestination)
     val uniqueVariants = fromADAMParquet.map(gt => gt.getVariant).distinct()
 
+    // Maps RDD of Genotypes to tuple of (Variant, VariantAnnotation) per unique variant
     uniqueVariants.map(v => (v, v.getAnnotation))
   }
 
