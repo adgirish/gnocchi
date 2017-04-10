@@ -12,7 +12,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     val destination = Files.createTempDirectory("").toAbsolutePath.toString + "/" + path
 
     val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
-    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner.txt").getFile
+    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
     val cliCall = s"../bin/gnocchi-submit regressPhenotypes $genoFilePath $phenoFilePath ADDITIVE_LINEAR $destination -saveAsText -phenoName pheno2 -covar -overwriteParquet"
     val cliArgs = cliCall.split(" ").drop(2)
 
@@ -52,7 +52,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     val destination = Files.createTempDirectory("").toAbsolutePath.toString + "/" + path
 
     val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
-    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner.txt").getFile
+    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
     val cliCall = s"../bin/gnocchi-submit regressPhenotypes $genoFilePath $phenoFilePath ADDITIVE_LINEAR $destination -saveAsText -phenoName pheno2 -overwriteParquet"
     val cliArgs = cliCall.split(" ").drop(2)
 
@@ -62,9 +62,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
 
     val associations = RegressPhenotypes(cliArgs).performAnalysis(genotypeStateDataset, phenotypeStateDataset, sc)
 
-    println("HERE!")
-    println("COUNT: " + associations.count())
-    associations.foreach(println(_))
+    // associations.foreach(println(_))
 
     assert(variantAnnotationRDD.count === 5)
   }

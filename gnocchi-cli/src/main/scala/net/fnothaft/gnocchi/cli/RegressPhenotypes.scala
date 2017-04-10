@@ -262,12 +262,25 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       case "DOMINANT_LOGISTIC" => DominantLogisticAssociation(genotypeStates.rdd, phenotypes)
     }
 
+    println("JAA")
+
     // Map RDD[Association] to RDD[(Variant, Association)]
     val keyedAssociations = associations.map(assoc => (assoc.variant, assoc))
+    println("-------")
+    println("keyedAssociations", keyedAssociations.foreach(pair => println(pair._1 + " | " + pair._2)))
+
     val keyedAnnotations = loadAnnotations(sc)
+    println("-------")
+    println("keyedAnnotations", keyedAnnotations.foreach(pair => println(pair._1 + " | " + pair._2)))
 
     val joinedAssocAnnot = keyedAnnotations.fullOuterJoin(keyedAssociations).map {
       case (variant, (annotation, association)) => (annotation, association)
+    }
+
+    println("-------")
+    for (jAA <- joinedAssocAnnot) {
+      println(jAA)
+      println("-------")
     }
 
     val assocExists = joinedAssocAnnot.filter(_._2.isDefined).map(assocAnnotPair => (assocAnnotPair._1, assocAnnotPair._2.get))
