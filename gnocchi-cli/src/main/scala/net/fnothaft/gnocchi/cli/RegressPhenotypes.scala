@@ -19,7 +19,7 @@ package net.fnothaft.gnocchi.cli
 
 import java.io.File
 import net.fnothaft.gnocchi.association._
-import net.fnothaft.gnocchi.models.GenotypeState
+import net.fnothaft.gnocchi.models._
 import net.fnothaft.gnocchi.sql.GnocchiContext._
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
@@ -33,7 +33,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.{ concat, lit }
 import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant, Genotype }
-import net.fnothaft.gnocchi.models.{ Phenotype, Association, AuxEncoders }
 import org.apache.spark.sql.Row
 
 object RegressPhenotypes extends BDGCommandCompanion {
@@ -104,6 +103,8 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     val genotypeStates = loadGenotypes(sc)
 
     val phenotypes = loadPhenotypes(sc)
+
+    val annotations = loadAnnotations(sc)
 
     val associations = performAnalysis(genotypeStates, phenotypes, sc)
 
@@ -261,11 +262,29 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       case "DOMINANT_LOGISTIC" => DominantLogisticAssociation(genotypeStates.rdd, phenotypes)
     }
 
+    // Map RDD[Association] to RDD[(Variant, Association)]
+    val keyedAssociations = associations.map(assoc => (assoc.variant, assoc))
+    val keyedAnnotations = loadAnnotations(sc)
+
+    val joinedAssocAnnot = keyedAnnotations.fullOuterJoin(keyedAssociations).map {
+      case (variant, (annotation, association)) => (annotation, association)
+    }
+
+    val assocExists = joinedAssocAnnot.filter(_._2.isDefined).map(assocAnnotPair => (assocAnnotPair._1, assocAnnotPair._2.get))
+    val annotatedAssociations = assocExists.map(
+      assocAnnotPair => {
+        val (annot, assoc) = assocAnnotPair
+        Association(assoc.variant, assoc.phenotype, assoc.logPValue, assoc.statistics, annot)
+      })
+
+    // (TODO) Join RDD of Associations with RDD of Annotations by Variant
+    // (TODO) Make sure Associations are keyed by Variant by returning RDD[(Variant, Association)]
+
     /*
      * creates dataset of Association objects instead of leaving as RDD in order
      * to make it easy to convert to DataFrame and write to parquet in logResults
      */
-    sqlContext.createDataset(associations)
+    sqlContext.createDataset(annotatedAssociations)
   }
 
   def logResults(associations: Dataset[Association],

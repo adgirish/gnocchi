@@ -119,7 +119,7 @@ trait LogisticSiteRegression extends SiteRegression with Logging {
     /* Use Hessian and weights to calculate the Wald Statistic, or p-value */
     var matrixSingular = false
 
-    var toRet = new Association(null, null, -9.0, null)
+    var toRet = new Association(null, null, -9.0, null, null)
     try {
       val fisherInfo = -hessian
       val fishInv = inv(fisherInfo)
@@ -146,7 +146,7 @@ trait LogisticSiteRegression extends SiteRegression with Logging {
         "prob" -> pi,
         "rSquared" -> 0.0)
 
-      toRet = Association(variant, phenotype, logWaldTests(1), statistics)
+      toRet = Association(variant, phenotype, logWaldTests(1), statistics, null)
     } catch {
       case error: breeze.linalg.MatrixSingularException => matrixSingular = true
     }
@@ -162,7 +162,7 @@ trait LogisticSiteRegression extends SiteRegression with Logging {
         "XiVectors" -> xiVectors(0),
         "xixit" -> xixiT(0),
         "prob" -> pi,
-        "rSquared" -> 0.0))
+        "rSquared" -> 0.0), null)
     }
     toRet
   }

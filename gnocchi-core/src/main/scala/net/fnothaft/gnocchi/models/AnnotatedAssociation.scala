@@ -17,15 +17,15 @@
  */
 package net.fnothaft.gnocchi.models
 
-import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant }
+import org.bdgenomics.formats.avro.{ Variant, VariantAnnotation }
 
-case class Association(variant: Variant,
-                       phenotype: String,
-                       logPValue: Double,
-                       var statistics: Map[String, Any],
-                       variantAnnotation: Option[VariantAnnotation]) {
+case class AnnotatedAssociation(variant: Variant,
+                                phenotype: String,
+                                logPValue: Double,
+                                var statistics: Map[String, Any],
+                                variantAnnotation: Option[VariantAnnotation]) {
 
-  implicit val myObjEncoder = org.apache.spark.sql.Encoders.kryo[Association]
+  implicit val myObjEncoder = org.apache.spark.sql.Encoders.kryo[AnnotatedAssociation]
 
 }
 
