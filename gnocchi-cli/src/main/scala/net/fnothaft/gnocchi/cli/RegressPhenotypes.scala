@@ -33,6 +33,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.{ concat, lit }
 import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant, Genotype }
+import scala.collection.JavaConversions._
 import org.apache.spark.sql.Row
 
 object RegressPhenotypes extends BDGCommandCompanion {
@@ -197,7 +198,17 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     val uniqueVariants = fromADAMParquet.map(gt => gt.getVariant).distinct()
 
     // Maps RDD of Genotypes to tuple of (Variant, VariantAnnotation) per unique variant
-    uniqueVariants.map(v => (v, v.getAnnotation))
+    uniqueVariants.map(v => {
+      val vAnnotation = v.getAnnotation
+      v.setContigName(v.getContigName + "_" + v.getEnd.toString + "_" + v.getAlternateAllele)
+      v.setAnnotation(null)
+      v.setFiltersApplied(null)
+      v.setFiltersPassed(null)
+      v.setFiltersFailed(List[String]())
+      v.setReferenceAllele(null)
+      (v, vAnnotation)
+    })
+    // uniqueVariants.map(v => (v, v.getAnnotation))
   }
 
   /**
@@ -262,31 +273,32 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       case "DOMINANT_LOGISTIC" => DominantLogisticAssociation(genotypeStates.rdd, phenotypes)
     }
 
-    println("JAA")
+    //    println("JAA")
 
     // Map RDD[Association] to RDD[(Variant, Association)]
     val keyedAssociations = associations.map(assoc => (assoc.variant, assoc))
-    println("-------")
-    println("keyedAssociations", keyedAssociations.foreach(pair => println(pair._1 + " | " + pair._2)))
+    //    println("-------")
+    //    println("keyedAssociations", keyedAssociations.foreach(pair => println(pair._1 + " | " + pair._2)))
 
     val keyedAnnotations = loadAnnotations(sc)
-    println("-------")
-    println("keyedAnnotations", keyedAnnotations.foreach(pair => println(pair._1 + " | " + pair._2)))
+    //    println("-------")
+    //    println("keyedAnnotations", keyedAnnotations.foreach(pair => println(pair._1 + " | " + pair._2)))
 
     val joinedAssocAnnot = keyedAnnotations.fullOuterJoin(keyedAssociations).map {
-      case (variant, (annotation, association)) => (annotation, association)
+      case (variant, (annotation, association)) => (association, annotation)
     }
 
-    println("-------")
-    for (jAA <- joinedAssocAnnot) {
-      println(jAA)
-      println("-------")
-    }
+    //    println("*-------*")
+    //    for (jAA <- joinedAssocAnnot) {
+    //      println(jAA._1 + "|" + jAA._2)
+    //      println("-------")
+    //    }
+    //    println("*-------*")
 
-    val assocExists = joinedAssocAnnot.filter(_._2.isDefined).map(assocAnnotPair => (assocAnnotPair._1, assocAnnotPair._2.get))
+    val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
     val annotatedAssociations = assocExists.map(
       assocAnnotPair => {
-        val (annot, assoc) = assocAnnotPair
+        val (assoc, annot) = assocAnnotPair
         Association(assoc.variant, assoc.phenotype, assoc.logPValue, assoc.statistics, annot)
       })
 
