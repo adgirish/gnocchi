@@ -25,28 +25,21 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(genotypeStateArray.length === 15)
     assert(variantAnnotationRDD.count === 5)
 
-    // (TODO) Temporarily removing these tests, PUT THEM BACK IN
-    //    assert(variantAnnotationRDD.first._2.getAncestralAllele === null)
-    //    assert(variantAnnotationRDD.first._2.getAlleleCount === 2)
-    //    assert(variantAnnotationRDD.first._2.getReadDepth === null)
-    //    assert(variantAnnotationRDD.first._2.getForwardReadDepth === null)
-    //    assert(variantAnnotationRDD.first._2.getReverseReadDepth === null)
-    //    assert(variantAnnotationRDD.first._2.getReferenceReadDepth === null)
-    //    assert(variantAnnotationRDD.first._2.getReferenceForwardReadDepth === null)
-    //    assert(variantAnnotationRDD.first._2.getReferenceReverseReadDepth === null)
-    //    assert(variantAnnotationRDD.first._2.getAlleleFrequency === 0.333f)
-    //    assert(variantAnnotationRDD.first._2.getCigar === null)
-    //    assert(variantAnnotationRDD.first._2.getDbSnp === null)
-    //    assert(variantAnnotationRDD.first._2.getHapMap2 === null)
-    //    assert(variantAnnotationRDD.first._2.getHapMap3 === null)
-    //    assert(variantAnnotationRDD.first._2.getValidated === null)
-    //    assert(variantAnnotationRDD.first._2.getThousandGenomes === null)
-    //    assert(variantAnnotationRDD.first._2.getSomatic === false)
+    assert(variantAnnotationRDD.first._2.getAncestralAllele === null)
+    assert(variantAnnotationRDD.first._2.getAlleleCount === 2)
+    assert(variantAnnotationRDD.first._2.getReadDepth === null)
+    assert(variantAnnotationRDD.first._2.getForwardReadDepth === null)
+    assert(variantAnnotationRDD.first._2.getReverseReadDepth === null)
+    assert(variantAnnotationRDD.first._2.getAlleleFrequency === 0.333f)
+    assert(variantAnnotationRDD.first._2.getCigar === null)
+    assert(variantAnnotationRDD.first._2.getDbSnp === null)
+    assert(variantAnnotationRDD.first._2.getHapMap2 === null)
+    assert(variantAnnotationRDD.first._2.getHapMap3 === null)
+    assert(variantAnnotationRDD.first._2.getValidated === null)
+    assert(variantAnnotationRDD.first._2.getThousandGenomes === null)
+    assert(variantAnnotationRDD.first._2.getSomatic === false)
+    assert(variantAnnotationRDD.first._2.getAttributes.get("ClippingRankSum") == "0.138")
 
-    //    for (gt <- variantAnnotationRDD) {
-    //      println(gt.toString)
-    //      println()
-    //    }
   }
 
   sparkTest("Joining Annotation and Assocation RDDs") {
@@ -64,13 +57,16 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
 
     val associations = RegressPhenotypes(cliArgs).performAnalysis(genotypeStateDataset, phenotypeStateDataset, sc)
 
-    println("*------*")
-    for (assoc <- associations.rdd) {
-      println("------")
-      println(assoc)
-    }
-
     assert(variantAnnotationRDD.count === 5)
+
+    assert(associations.rdd.first.variant.getContigName === "1_14522_A")
+    assert(associations.rdd.first.variant.getAlternateAllele === "A")
+    assert(associations.rdd.first.variantAnnotation.isDefined === true)
+    assert(associations.rdd.first.variantAnnotation.get.getAlleleCount == 2)
+    assert(associations.rdd.first.variantAnnotation.get.getAlleleFrequency == 0.333f)
+    assert(associations.rdd.first.variantAnnotation.get.getSomatic == false)
+    assert(associations.rdd.first.variantAnnotation.get.getAttributes.get("ClippingRankSum") == "-2.196")
+
   }
 
 }
