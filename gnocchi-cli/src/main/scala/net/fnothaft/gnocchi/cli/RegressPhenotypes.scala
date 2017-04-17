@@ -19,7 +19,6 @@ package net.fnothaft.gnocchi.cli
 
 import java.io.File
 import net.fnothaft.gnocchi.association._
-import net.fnothaft.gnocchi.models._
 import net.fnothaft.gnocchi.sql.GnocchiContext._
 import org.apache.spark.SparkContext
 import org.apache.spark.sql.SQLContext
@@ -32,6 +31,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.{ concat, lit }
+import net.fnothaft.gnocchi.models.{ Phenotype, Association, AuxEncoders, GenotypeState }
 import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant, Genotype }
 import scala.collection.JavaConversions._
 import org.apache.spark.sql.Row
