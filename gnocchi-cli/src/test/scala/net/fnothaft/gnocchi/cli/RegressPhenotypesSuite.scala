@@ -99,45 +99,45 @@ class RegressPhenotypesSuite extends GnocchiFunSuite {
     assert(regressionResult(0).statistics("rSquared") == 1.0, "rSquared = " + regressionResult(0).statistics("rSquared"))
   }
 
-//  sparkTest("Test full pipeline: 5 snps, 10 samples, 1 phenotype, 2 random noise covars") {
-//    /*
-//     Uniform White Noise for Covar 1 (pheno4):
-//      0.8404
-//     -0.8880
-//      0.1001
-//     -0.5445
-//      0.3035
-//     -0.6003
-//      0.4900
-//      0.7394
-//      1.7119
-//     -0.1941
-//    Uniform White Noise for Covar 2 (pheno5):
-//      2.9080
-//      0.8252
-//      1.3790
-//     -1.0582
-//     -0.4686
-//     -0.2725
-//      1.0984
-//     -0.2779
-//      0.7015
-//     -2.0518
-//   */
-//
-//    val genoFilePath = ClassLoader.getSystemClassLoader.getResource("5snps10samples.vcf").getFile
-//    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("10samples5Phenotypes2covars.txt").getFile
-//    val covarFilePath = ClassLoader.getSystemClassLoader.getResource("10samples5Phenotypes2covars.txt").getFile
-//    val cliCall = s"../bin/gnocchi-submit regressPhenotypes $genoFilePath $phenoFilePath ADDITIVE_LINEAR $destination -saveAsText -phenoName pheno1 -covar -covarFile $covarFilePath -covarNames pheno4,pheno5 -overwriteParquet"
-//    val cliArgs = cliCall.split(" ").drop(2)
-//    val genotypeStates = RegressPhenotypes(cliArgs).loadGenotypes(sc)
-//    val phenotypes = RegressPhenotypes(cliArgs).loadPhenotypes(sc)
-//    val assocs = RegressPhenotypes(cliArgs).performAnalysis(genotypeStates, phenotypes, sc)
-//    val regressionResult = assocs.collect()
-//
-//    RegressPhenotypes(cliArgs).logResults(assocs, sc)
-//    assert(regressionResult(0).statistics("rSquared") == 0.833277921795612, "rSquared = " + regressionResult(0).statistics("rSquared"))
-//
-//  }
+  //  sparkTest("Test full pipeline: 5 snps, 10 samples, 1 phenotype, 2 random noise covars") {
+  //    /*
+  //     Uniform White Noise for Covar 1 (pheno4):
+  //      0.8404
+  //     -0.8880
+  //      0.1001
+  //     -0.5445
+  //      0.3035
+  //     -0.6003
+  //      0.4900
+  //      0.7394
+  //      1.7119
+  //     -0.1941
+  //    Uniform White Noise for Covar 2 (pheno5):
+  //      2.9080
+  //      0.8252
+  //      1.3790
+  //     -1.0582
+  //     -0.4686
+  //     -0.2725
+  //      1.0984
+  //     -0.2779
+  //      0.7015
+  //     -2.0518
+  //   */
+  //
+  //    val genoFilePath = ClassLoader.getSystemClassLoader.getResource("5snps10samples.vcf").getFile
+  //    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("10samples5Phenotypes2covars.txt").getFile
+  //    val covarFilePath = ClassLoader.getSystemClassLoader.getResource("10samples5Phenotypes2covars.txt").getFile
+  //    val cliCall = s"../bin/gnocchi-submit regressPhenotypes $genoFilePath $phenoFilePath ADDITIVE_LINEAR $destination -saveAsText -phenoName pheno1 -covar -covarFile $covarFilePath -covarNames pheno4,pheno5 -overwriteParquet"
+  //    val cliArgs = cliCall.split(" ").drop(2)
+  //    val genotypeStates = RegressPhenotypes(cliArgs).loadGenotypes(sc)
+  //    val phenotypes = RegressPhenotypes(cliArgs).loadPhenotypes(sc)
+  //    val assocs = RegressPhenotypes(cliArgs).performAnalysis(genotypeStates, phenotypes, sc)
+  //    val regressionResult = assocs.collect()
+  //
+  //    RegressPhenotypes(cliArgs).logResults(assocs, sc)
+  //    assert(regressionResult(0).statistics("rSquared") == 0.833277921795612, "rSquared = " + regressionResult(0).statistics("rSquared"))
+  //
+  //  }
 
 }

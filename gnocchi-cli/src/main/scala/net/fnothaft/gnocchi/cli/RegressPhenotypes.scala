@@ -289,9 +289,6 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
         Association(assoc.variant, assoc.phenotype, assoc.logPValue, assoc.statistics, annot)
       })
 
-    // (TODO) Join RDD of Associations with RDD of Annotations by Variant
-    // (TODO) Make sure Associations are keyed by Variant by returning RDD[(Variant, Association)]
-
     /*
      * creates dataset of Association objects instead of leaving as RDD in order
      * to make it easy to convert to DataFrame and write to parquet in logResults
@@ -311,8 +308,8 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     if (args.saveAsText) {
       associations.rdd.keyBy(_.logPValue)
         .sortBy(_._1)
-        .map(r => "%s, %s, %s".format(r._2.variant.getContigName,
-          r._2.variant.getStart, Math.pow(10, r._2.logPValue).toString))
+        .map(r => "%s, %s, %s | %s".format(r._2.variant.getContigName,
+          r._2.variant.getStart, Math.pow(10, r._2.logPValue).toString, r._2.variantAnnotation.get))
         .saveAsTextFile(args.associations)
     } else {
       associations.toDF.write.parquet(args.associations)
