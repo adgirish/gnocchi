@@ -26,7 +26,7 @@ import net.fnothaft.gnocchi.models.Association
 class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
 
   val path = "src/test/resources/testData/AnnotatedVCFHandlingSuite"
-  val destination = Files.createTempDirectory("").toAbsolutePath.toString + "/" + path
+  val destination = "src/test/resources/testData/AnnotatedVCFHandlingSuite" //Files.createTempDirectory("").toAbsolutePath.toString + "/" + path
 
   sparkTest("Processing in annotated VCFfile from snpEff") {
     val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
@@ -94,12 +94,11 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     val genotypeStates = RegressPhenotypes(cliArgs).loadGenotypes(sc)
     val phenotypes = RegressPhenotypes(cliArgs).loadPhenotypes(sc)
 
-    val regressionResult = RegressPhenotypes(cliArgs).performAnalysis(genotypeStates, phenotypes, sc).collect()
+    val regressionResult = RegressPhenotypes(cliArgs).performAnalysis(genotypeStates, phenotypes, sc)
+    RegressPhenotypes(cliArgs).logResults(regressionResult, sc)
 
-    val logFile = scala.io.Source.fromFile(s"$destination").mkString
+    // val logFile = scala.io.Source.fromFile(s"$destination").mkString
     // (TODO) Process and verify contents of logFile
-
-
 
   }
 

@@ -298,6 +298,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
 
   def logResults(associations: Dataset[Association],
                  sc: SparkContext) = {
+
     // deletes files in output destination if they exist
     val associationsFile = new File(args.associations)
     if (associationsFile.exists) {
@@ -309,7 +310,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       associations.rdd.keyBy(_.logPValue)
         .sortBy(_._1)
         .map(r => "%s, %s, %s | %s".format(r._2.variant.getContigName,
-          r._2.variant.getStart, Math.pow(10, r._2.logPValue).toString, r._2.variantAnnotation.get))
+          r._2.variant.getStart, Math.pow(10, r._2.logPValue).toString, r._2.variantAnnotation.getOrElse("NONE").toString))
         .saveAsTextFile(args.associations)
     } else {
       associations.toDF.write.parquet(args.associations)
