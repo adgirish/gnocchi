@@ -18,7 +18,7 @@
 package net.fnothaft.gnocchi.models
 
 import org.bdgenomics.adam.models.ReferenceRegion
-import org.bdgenomics.formats.avro.{ Contig, Variant }
+import org.bdgenomics.formats.avro._
 
 case class GenotypeState(contig: String,
                          start: Long,
