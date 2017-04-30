@@ -17,25 +17,31 @@
  */
 package net.fnothaft.gnocchi.cli
 
-import java.io.{ File }
+import java.io.File
+
 import net.fnothaft.gnocchi.association._
 import net.fnothaft.gnocchi.models.GenotypeState
 import net.fnothaft.gnocchi.sql.GnocchiContext._
-import org.apache.spark.SparkContext._
+import org.apache.commons.io.FileUtils
 import org.apache.spark.SparkContext
-import org.apache.spark.sql.SQLContext
-import org.bdgenomics.adam.rdd.ADAMContext._
-import org.bdgenomics.formats.avro._
+import org.apache.spark.sql.SparkSession
 import org.bdgenomics.utils.cli._
 import org.kohsuke.args4j.{ Argument, Option => Args4jOption }
-import scala.math.exp
 
+import scala.math.exp
+import org.bdgenomics.adam.models.VariantContext
+import org.bdgenomics.adam.rdd.ADAMContext
 import org.bdgenomics.adam.cli.Vcf2ADAM
-import org.apache.commons.io.FileUtils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.{ concat, lit }
-import net.fnothaft.gnocchi.models.{ Phenotype, Association, AuxEncoders }
+import net.fnothaft.gnocchi.models.{ Association, AuxEncoders, Phenotype }
+import org.apache.hadoop.fs.{ FileSystem, Path }
+import org.apache.spark.sql.functions.{ concat, lit, sum, count, struct, explode, collect_list }
+import net.fnothaft.gnocchi.models.{ Phenotype, Association, AuxEncoders, GenotypeState }
+import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant, Genotype }
+import scala.collection.JavaConversions._
+import org.apache.spark.sql.Row
 
 object RegressPhenotypes extends BDGCommandCompanion {
   val commandName = "regressPhenotypes"
@@ -118,6 +124,9 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
 
     // Perform analysis
     val associations = performAnalysis(genotypeStates, phenotypes, sc)
+
+    // Load annotations
+    val annotations = loadAnnotations(sc)
 
     // Log the results
     logResults(associations, sc)
@@ -293,6 +302,50 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     phenotypes
   }
 
+  /**
+    * Returns a RDD of VariantAnnotations's from vcf input.
+    *
+    * @note
+    * @param sc The spark context in which Gnocchi is running.
+    * @return A RDD of VariantAnnotation objects.
+    */
+  def loadAnnotations(sc: SparkContext): RDD[(Variant, VariantAnnotation)] = {
+    /*
+     * Checks for existance of ADAM-formatted parquet files in output directory
+     * Creates them if none exist.
+     */
+    val absAssociationPath = new File(args.associations).getAbsolutePath
+    val parquetInputDestination = absAssociationPath.split("/").reverse.drop(1)
+      .reverse.mkString("/") + "/annotationInputFiles/"
+    val parquetFiles = new File(parquetInputDestination)
+    if (!parquetFiles.getAbsoluteFile.exists) {
+      val cmdLine: Array[String] = Array[String](args.genotypes, parquetInputDestination)
+      Vcf2ADAM(cmdLine).run(sc)
+    } else if (args.overwrite) {
+      FileUtils.deleteDirectory(parquetFiles)
+      val cmdLine: Array[String] = Array[String](args.genotypes, parquetInputDestination)
+      Vcf2ADAM(cmdLine).run(sc)
+    }
+
+    // Uses ADAM's parquet loader to construct RDD of Genotypes
+    val ac = new ADAMContext(sc)
+    val fromADAMParquet = ac.loadParquet[Genotype](parquetInputDestination) //ac.loadParquet[VariantContext](parquetInputDestination)
+    val uniqueVariants = fromADAMParquet.map(gt => gt.getVariant).distinct()
+
+    // Maps RDD of Genotypes to tuple of (Variant, VariantAnnotation) per unique variant
+    uniqueVariants.map(v => {
+      val vAnnotation = v.getAnnotation
+      v.setContigName(v.getContigName + "_" + v.getEnd.toString + "_" + v.getAlternateAllele)
+      v.setAnnotation(null)
+      v.setFiltersApplied(null)
+      v.setFiltersPassed(null)
+      v.setFiltersFailed(List[String]())
+      v.setReferenceAllele(null)
+      (v, vAnnotation)
+    })
+    // uniqueVariants.map(v => (v, v.getAnnotation))
+  }
+
   def performAnalysis(genotypeStates: Dataset[GenotypeState],
                       phenotypes: RDD[Phenotype[Array[Double]]],
                       sc: SparkContext): Dataset[Association] = {
@@ -318,9 +371,10 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       FileUtils.deleteDirectory(associationsFile)
     }
     if (args.saveAsText) {
-      associations.rdd.keyBy(_.logPValue).sortBy(_._1).map(r => "%s, %s, %s"
-        .format(r._2.variant.getContig.getContigName,
-          r._2.variant.getStart, Math.pow(10, r._2.logPValue).toString))
+      associations.rdd.keyBy(_.logPValue)
+        .sortBy(_._1)
+        .map(r => "%s, %s, %s | %s".format(r._2.variant.getContigName,
+          r._2.variant.getStart, Math.pow(10, r._2.logPValue).toString, r._2.variantAnnotation.getOrElse("None").toString))
         .saveAsTextFile(args.associations)
     } else {
       associations.toDF.write.parquet(args.associations)
