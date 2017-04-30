@@ -180,13 +180,13 @@ trait LogisticSiteRegression extends SiteRegression {
         "prob" -> pi)
       //        "logitArray" -> logitArray(0))
 
-      toRet = Association(variant, phenotype, logWaldTests(1), statistics)
+      toRet = Association(variant, phenotype, logWaldTests(1), statistics, null)
     } catch {
       case error: breeze.linalg.MatrixSingularException => matrixSingular = true
     }
     if (matrixSingular) {
       val statistics = Map()
-      toRet = Association(variant, phenotype, 0.0, Map())
+      toRet = Association(variant, phenotype, 0.0, Map(), null)
       println("in wald test: " + hessian)
     }
     toRet
