@@ -82,12 +82,12 @@ trait SiteApplication[VM <: VariantModel[VM]] extends Serializable with Logging 
             case "STRICT" => throw new SingularMatrixException()
             case "LENIENT" => {
               logError("Singular Matrix found in SiteRegression")
-              constructAssociation(variant.getContigName, 1, "", new Array[Double](formattedObvs.head._2.length + 1), 0.0, variant, "", 0.0, 0.0, Map(("", "")))
+              constructAssociation(variant.getContigName, 1, "", new Array[Double](formattedObvs.head._2.length + 1), 0.0, variant, "", 0.0, 0.0, Map(("", "")), None)
             }
             case "SILENT" => {
               println("here here")
               println(new Array[Double](formattedObvs.head._2.length))
-              constructAssociation(variant.getContigName, 1, "", new Array[Double](formattedObvs.head._2.length + 1), 0.0, variant, "", 0.0, 0.0, Map(("", "")))
+              constructAssociation(variant.getContigName, 1, "", new Array[Double](formattedObvs.head._2.length + 1), 0.0, variant, "", 0.0, 0.0, Map(("", "")), None)
             }
           }
         }
@@ -120,7 +120,8 @@ trait SiteApplication[VM <: VariantModel[VM]] extends Serializable with Logging 
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): Association[VM]
+                           statistics: Map[String, Any],
+                           variantAnnotation: Option[VariantAnnotation]): Association[VM]
 }
 
 trait Additive {

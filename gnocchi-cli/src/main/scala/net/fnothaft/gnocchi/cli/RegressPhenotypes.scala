@@ -63,6 +63,9 @@ class RegressPhenotypesArgs extends Args4jBase {
 
   @Argument(required = true, metaVar = "ASSOCIATIONS", usage = "The location to save associations to.", index = 3)
   var associations: String = _
+  
+  @Args4jOption(required = false, name = "-annotate", usage = "Whether to include annotations.")
+  var annotate = false
 
   @Args4jOption(required = true, name = "-phenoName", usage = "The phenotype to regress.")
   var phenoName: String = _
@@ -115,6 +118,10 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     val phenotypes = sc.loadPhenotypes(args.phenotypes, args.phenoName, args.oneTwo,
       args.includeCovariates, args.covarFile, args.covarNames)
 
+    if (annotate) {
+      val annotations = sc.loadAnnotations(args.associations, args.genotypes)
+    }
+
     import net.fnothaft.gnocchi.sql.AuxEncoders._
 
     args.associationType match {
@@ -143,9 +150,14 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
   }
 
   def logResults[A <: VariantModel[A]](associations: Dataset[Association[A]],
+                                       annotations: RDD[(Variant, VariantAnnotation)],
                                        sc: SparkContext) = {
     val sparkSession = SparkSession.builder().getOrCreate()
     import sparkSession.implicits._
+    
+    if (annotate) {
+      sc.mergeAssociationsAndAnnotations(associations, annotations)
+    }
 
     // save dataset
     val associationsFile = new Path(args.associations)

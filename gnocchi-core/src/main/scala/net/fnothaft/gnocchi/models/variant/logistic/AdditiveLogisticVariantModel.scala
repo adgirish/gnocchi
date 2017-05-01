@@ -48,7 +48,8 @@ case class AdditiveLogisticVariantModel(variantId: String,
           "",
           0.0,
           0.0,
-          Map(("", ""))).toVariantModel
+          Map(("", ""))).toVariantModel,
+          None
       }
     }
     mergeWith(batchVariantModel)

@@ -188,6 +188,22 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
       combineAndFilterPhenotypes(oneTwo, phenotypes, header, primaryPhenoIndex, delimiter)
     }
   }
+  
+  /**
+  * Returns an RDD of VariantAnnotations from vcf input.
+  *
+  * @note
+  * @param sc The spark context in which Gnocchi is running.
+  * @return An RDD of VariantAnnotation objects.
+  */
+  def loadAnnotations(associationPath: String, genotypesPath: String): RDD[(Variant, VariantAnnotation)] = {
+    
+  }
+  
+  def mergeAssociationsAndAnnotations(associations: Dataset[Association[A]], 
+                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association] {
+    
+  }
 
   def loadFileAndCheckHeader(path: String, variablesString: String, isCovars: Boolean = false): (RDD[String], Array[String], Array[Int], String) = {
     val lines = sc.textFile(path).persist()

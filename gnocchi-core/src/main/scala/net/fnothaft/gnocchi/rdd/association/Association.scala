@@ -34,6 +34,7 @@ trait Association[VM <: VariantModel[VM]] {
   val logPValue: Double
   val pValue: Double
   val statistics: Map[String, Any]
+  val VariantAnnotation: Option[VariantAnnotation]
 
   def toVariantModel: VM
 }
@@ -151,4 +152,3 @@ case class DominantLogisticAssociation(variantId: String,
       numSamples, phenotype)
   }
 }
-

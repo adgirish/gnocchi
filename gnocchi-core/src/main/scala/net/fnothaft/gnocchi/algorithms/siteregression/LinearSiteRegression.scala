@@ -130,7 +130,8 @@ trait LinearSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM] {
         phenotype,
         logPValue,
         pvalue,
-        statistics)
+        statistics,
+        None)
     } catch {
       case _: SingularMatrixException => constructAssociation(variant.getContigName,
         numObservations,
@@ -141,7 +142,8 @@ trait LinearSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM] {
         phenotype,
         0.0,
         0.0,
-        Map())
+        Map(),
+        None)
     }
   }
 
@@ -159,7 +161,8 @@ trait LinearSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM] {
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): Association[VM]
+                           statistics: Map[String, Any]
+                           variantAnnotation: Option[VariantAnnotation]): Association[VM]
 }
 
 object AdditiveLinearRegression extends AdditiveLinearRegression {
@@ -177,7 +180,8 @@ trait AdditiveLinearRegression extends LinearSiteRegression[AdditiveLinearVarian
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): AdditiveLinearAssociation = {
+                           statistics: Map[String, Any],
+                           variantAnnotation: Option[VariantAnnotation]): AdditiveLinearAssociation = {
     new AdditiveLinearAssociation(variantId, numSamples, modelType, weights,
       geneticParameterStandardError, variant, phenotype,
       logPValue, pValue, statistics)
@@ -199,7 +203,8 @@ trait DominantLinearRegression extends LinearSiteRegression[AdditiveLinearVarian
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): DominantLinearAssociation = {
+                           statistics: Map[String, Any],
+                           variantAnnotation: Option[VariantAnnotation]): DominantLinearAssociation = {
     new DominantLinearAssociation(variantId, numSamples, modelType, weights,
       geneticParameterStandardError, variant, phenotype,
       logPValue, pValue, statistics)

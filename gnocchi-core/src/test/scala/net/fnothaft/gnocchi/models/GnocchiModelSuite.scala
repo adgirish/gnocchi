@@ -215,7 +215,7 @@ class GnocchiModelSuite extends GnocchiFunSuite {
         .toVariantModel
     } catch {
       case error: SingularMatrixException => {
-        AdditiveLogisticRegression.constructAssociation(variant0.getContigName, 0, "", new Array[Double](4), 0.0, variant0, "", 0.0, 0.0, Map(("", ""))).toVariantModel
+        AdditiveLogisticRegression.constructAssociation(variant0.getContigName, 0, "", new Array[Double](4), 0.0, variant0, "", 0.0, 0.0, Map(("", "")), None).toVariantModel
       }
     }
     // TODO: make this not throw a singular matrix error
@@ -224,7 +224,7 @@ class GnocchiModelSuite extends GnocchiFunSuite {
         .toVariantModel
     } catch {
       case error: SingularMatrixException => {
-        AdditiveLogisticRegression.constructAssociation(variant1.getContigName, 0, "", new Array[Double](4), 0.0, variant1, "", 0.0, 0.0, Map(("", ""))).toVariantModel
+        AdditiveLogisticRegression.constructAssociation(variant1.getContigName, 0, "", new Array[Double](4), 0.0, variant1, "", 0.0, 0.0, Map(("", "")), None).toVariantModel
       }
     }
 
@@ -234,7 +234,7 @@ class GnocchiModelSuite extends GnocchiFunSuite {
         .toVariantModel
     } catch {
       case error: SingularMatrixException => {
-        AdditiveLogisticRegression.constructAssociation(variant2.getContigName, 0, "", new Array[Double](4), 0.0, variant2, "", 0.0, 0.0, Map(("", ""))).toVariantModel
+        AdditiveLogisticRegression.constructAssociation(variant2.getContigName, 0, "", new Array[Double](4), 0.0, variant2, "", 0.0, 0.0, Map(("", "")), None).toVariantModel
       }
     }
 

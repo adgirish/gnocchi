@@ -167,7 +167,8 @@ trait LogisticSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM]
         phenotype,
         waldTests(1),
         logWaldTests(1),
-        statistics)
+        statistics,
+        None)
     } catch {
       case _: breeze.linalg.MatrixSingularException => {
         throw new SingularMatrixException()
@@ -192,7 +193,8 @@ trait LogisticSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM]
       //            "XiVectors" -> xiVectors(0),
       //            "xixit" -> xixiT(0),
       //            "prob" -> pi,
-      //            "rSquared" -> 0.0))
+      //            "rSquared" -> 0.0),
+      //            None)
       //      }
     }
   }
@@ -237,7 +239,8 @@ trait LogisticSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM]
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): Association[VM]
+                           statistics: Map[String, Any],
+                           variantAnnotation: Option[VariantAnnotation]): Association[VM]
 }
 
 object AdditiveLogisticRegression extends AdditiveLogisticRegression {
@@ -253,7 +256,8 @@ trait AdditiveLogisticRegression extends LogisticSiteRegression[AdditiveLogistic
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): AdditiveLogisticAssociation = {
+                           statistics: Map[String, Any],
+                           variantAnnotation: Option[VariantAnnotation]): AdditiveLogisticAssociation = {
     new AdditiveLogisticAssociation(variantId, numSamples, modelType, weights, geneticParameterStandardError,
       variant, phenotype, logPValue, pValue, statistics)
   }
@@ -273,7 +277,8 @@ trait DominantLogisticRegression extends LogisticSiteRegression[AdditiveLogistic
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]): DominantLogisticAssociation = {
+                           statistics: Map[String, Any],
+                           variantAnnotation: Option[VariantAnnotation]): DominantLogisticAssociation = {
     new DominantLogisticAssociation(variantId, numSamples, modelType, weights, geneticParameterStandardError,
       variant, phenotype, logPValue, pValue, statistics)
   }
