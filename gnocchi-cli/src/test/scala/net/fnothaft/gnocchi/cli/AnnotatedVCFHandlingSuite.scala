@@ -87,7 +87,6 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(checkAssoc.first.variantAnnotation.get.getSomatic == false)
     assert(checkAssoc.first.variantAnnotation.get.getAttributes.get("ClippingRankSum") == "0.138")
   }
-
   
   sparkTest("Annotations being successfully written to output log file") {
 
@@ -108,4 +107,5 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
 
     FileUtils.deleteDirectory(new File("../test_data_out"))
   }
+
 }
