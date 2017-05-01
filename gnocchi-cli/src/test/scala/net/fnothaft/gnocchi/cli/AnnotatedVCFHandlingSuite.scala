@@ -88,5 +88,24 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(checkAssoc.first.variantAnnotation.get.getAttributes.get("ClippingRankSum") == "0.138")
   }
 
-  // (TODO) Write log output test
+  
+  sparkTest("Annotations being successfully written to output log file") {
+
+    val testOutput = "../test_data_out/annotations_test"
+    val expectedOutput = "src/test/resources/AnnotationsOutput.txt"
+
+    val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
+    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
+    val cliCall = s"../bin/gnocchi-submit regressPhenotypes $genoFilePath $phenoFilePath ADDITIVE_LINEAR $testOutput -saveAsText -phenoName pheno1 -overwriteParquet"
+    val cliArgs = cliCall.split(" ").drop(2)
+
+    RegressPhenotypes(cliArgs).run(sc)
+
+    val expectedOuputLines = Source.fromFile(expectedOutput).getLines.toSet
+    val lines = Source.fromFile(testOutput + "/part-00000").getLines.toSet
+
+    assert(expectedOuputLines sameElements lines)
+
+    FileUtils.deleteDirectory(new File("../test_data_out"))
+  }
 }
