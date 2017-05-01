@@ -19,7 +19,7 @@ package net.fnothaft.gnocchi.sql
 
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
-import org.bdgenomics.formats.avro.{ Contig, Variant }
+import org.bdgenomics.formats.avro.{VariantAnnotation, Contig, Variant}
 import org.bdgenomics.utils.misc.Logging
 import net.fnothaft.gnocchi.algorithms._
 import net.fnothaft.gnocchi.algorithms.siteregression._
