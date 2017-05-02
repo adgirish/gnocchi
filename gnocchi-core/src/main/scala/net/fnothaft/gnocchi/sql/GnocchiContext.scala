@@ -22,8 +22,12 @@ import java.io.File
 import org.apache.commons.io.FileUtils
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
+<<<<<<< HEAD
 import org.bdgenomics.adam.rdd.ADAMContext
 import org.bdgenomics.formats.avro.{ Genotype, VariantAnnotation, Contig, Variant }
+=======
+import org.bdgenomics.formats.avro.{VariantAnnotation, Contig, Variant}
+>>>>>>> 6827a3a220030a28310ed8f860882048241c65a1
 import org.bdgenomics.utils.misc.Logging
 import net.fnothaft.gnocchi.algorithms._
 import net.fnothaft.gnocchi.algorithms.siteregression._
