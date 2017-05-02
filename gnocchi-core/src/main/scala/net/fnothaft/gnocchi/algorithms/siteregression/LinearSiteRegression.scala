@@ -23,7 +23,7 @@ import net.fnothaft.gnocchi.rdd.association.{ AdditiveLinearAssociation, Associa
 import org.apache.commons.math3.distribution.TDistribution
 import org.apache.commons.math3.linear.SingularMatrixException
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression
-import org.bdgenomics.formats.avro.Variant
+import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant }
 
 import scala.math.log10
 
@@ -161,7 +161,7 @@ trait LinearSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM] {
                            phenotype: String,
                            logPValue: Double,
                            pValue: Double,
-                           statistics: Map[String, Any]
+                           statistics: Map[String, Any],
                            variantAnnotation: Option[VariantAnnotation]): Association[VM]
 }
 
@@ -184,7 +184,7 @@ trait AdditiveLinearRegression extends LinearSiteRegression[AdditiveLinearVarian
                            variantAnnotation: Option[VariantAnnotation]): AdditiveLinearAssociation = {
     new AdditiveLinearAssociation(variantId, numSamples, modelType, weights,
       geneticParameterStandardError, variant, phenotype,
-      logPValue, pValue, statistics)
+      logPValue, pValue, statistics, None)
   }
 }
 
@@ -207,6 +207,6 @@ trait DominantLinearRegression extends LinearSiteRegression[AdditiveLinearVarian
                            variantAnnotation: Option[VariantAnnotation]): DominantLinearAssociation = {
     new DominantLinearAssociation(variantId, numSamples, modelType, weights,
       geneticParameterStandardError, variant, phenotype,
-      logPValue, pValue, statistics)
+      logPValue, pValue, statistics, None)
   }
 }

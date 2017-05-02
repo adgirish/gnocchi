@@ -60,7 +60,6 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(variantAnnotationRDD.first._2.getAttributes.get("ClippingRankSum") == "-2.196")
   }
 
-
   sparkTest("Joining Annotation and Assocation RDDs") {
     val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
     val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
@@ -87,7 +86,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(checkAssoc.first.variantAnnotation.get.getSomatic == false)
     assert(checkAssoc.first.variantAnnotation.get.getAttributes.get("ClippingRankSum") == "0.138")
   }
-  
+
   sparkTest("Annotations being successfully written to output log file") {
 
     val testOutput = "../test_data_out/annotations_test"

@@ -23,7 +23,7 @@ import net.fnothaft.gnocchi.rdd.association.Association
 import net.fnothaft.gnocchi.rdd.genotype.GenotypeState
 import net.fnothaft.gnocchi.rdd.phenotype.Phenotype
 import org.apache.spark.rdd.RDD
-import org.bdgenomics.formats.avro.Variant
+import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant }
 import org.bdgenomics.utils.misc.Logging
 
 trait SiteApplication[VM <: VariantModel[VM]] extends Serializable with Logging {

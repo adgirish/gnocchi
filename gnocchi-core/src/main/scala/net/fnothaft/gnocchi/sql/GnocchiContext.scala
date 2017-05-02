@@ -17,9 +17,13 @@
  */
 package net.fnothaft.gnocchi.sql
 
+import java.io.File
+
+import org.apache.commons.io.FileUtils
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
-import org.bdgenomics.formats.avro.{VariantAnnotation, Contig, Variant}
+import org.bdgenomics.adam.rdd.ADAMContext
+import org.bdgenomics.formats.avro.{ Genotype, VariantAnnotation, Contig, Variant }
 import org.bdgenomics.utils.misc.Logging
 import net.fnothaft.gnocchi.algorithms._
 import net.fnothaft.gnocchi.algorithms.siteregression._
@@ -38,6 +42,7 @@ import net.fnothaft.gnocchi.rdd.genotype.GenotypeState
 import net.fnothaft.gnocchi.rdd.phenotype.Phenotype
 import org.apache.hadoop.fs.Path
 import org.bdgenomics.adam.cli.Vcf2ADAM
+import net.fnothaft.gnocchi.rdd.association
 
 object GnocchiContext {
 
@@ -188,21 +193,109 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
       combineAndFilterPhenotypes(oneTwo, phenotypes, header, primaryPhenoIndex, delimiter)
     }
   }
-  
+
   /**
-  * Returns an RDD of VariantAnnotations from vcf input.
-  *
-  * @note
-  * @param sc The spark context in which Gnocchi is running.
-  * @return An RDD of VariantAnnotation objects.
-  */
-  def loadAnnotations(associationPath: String, genotypesPath: String): RDD[(Variant, VariantAnnotation)] = {
-    
+   * Returns an RDD of VariantAnnotations from vcf input.
+   *
+   * @note
+   * @param sc The spark context in which Gnocchi is running.
+   * @return An RDD of VariantAnnotation objects.
+   */
+  def loadAnnotations(associationPath: String, genotypesPath: String, adamDestination: String, overwrite: Boolean): RDD[(Variant, VariantAnnotation)] = {
+    /*
+     * Checks for existance of ADAM-formatted parquet files in output directory
+     * Creates them if none exist.
+     */
+    //    val absAssociationPath = new File(args.associations).getAbsolutePath
+    //    val parquetInputDestination = absAssociationPath.split("/").reverse.drop(1)
+    //      .reverse.mkString("/") + "/annotationInputFiles/"
+    //    val parquetFiles = new File(parquetInputDestination)
+    //    if (!parquetFiles.getAbsoluteFile.exists) {
+    //      val cmdLine: Array[String] = Array[String](args.genotypes, parquetInputDestination)
+    //      Vcf2ADAM(cmdLine).run(sc)
+    //    } else if (args.overwrite) {
+    //      FileUtils.deleteDirectory(parquetFiles)
+    //      val cmdLine: Array[String] = Array[String](args.genotypes, parquetInputDestination)
+    //      Vcf2ADAM(cmdLine).run(sc)
+    //    }
+
+    val absAdamDestination = new Path(adamDestination)
+    val fs = absAdamDestination.getFileSystem(sc.hadoopConfiguration)
+    // val absAssociationStr = fs.getFileStatus(relAssociationPath).getPath.toString
+    val parquetInputDestination = absAdamDestination.toString.split("/").reverse.drop(1).reverse.mkString("/") + "/parquetInputFiles/"
+    val parquetFiles = new Path(parquetInputDestination)
+
+    val vcfPath = genotypesPath
+
+    // check for ADAM formatted version of the file specified in genotypes. If it doesn't exist, convert vcf to parquet using vcf2adam.
+    if (!fs.exists(parquetFiles)) {
+      val cmdLine: Array[String] = Array[String](vcfPath, parquetInputDestination)
+      Vcf2ADAM(cmdLine).run(sc)
+    } else if (overwrite) {
+      fs.delete(parquetFiles, true)
+      val cmdLine: Array[String] = Array[String](vcfPath, parquetInputDestination)
+      Vcf2ADAM(cmdLine).run(sc)
+    }
+
+    // Uses ADAM's parquet loader to construct RDD of Genotypes
+    val ac = new ADAMContext(sc)
+    val fromADAMParquet = ac.loadParquet[Genotype](parquetInputDestination) //ac.loadParquet[VariantContext](parquetInputDestination)
+    val uniqueVariants = fromADAMParquet.map(gt => gt.getVariant).distinct()
+
+    // Maps RDD of Genotypes to tuple of (Variant, VariantAnnotation) per unique variant
+    uniqueVariants.map(v => {
+      val vAnnotation = v.getAnnotation
+      v.setContigName(v.getContigName + "_" + v.getEnd.toString + "_" + v.getAlternateAllele)
+      v.setAnnotation(null)
+      v.setFiltersApplied(null)
+      v.setFiltersPassed(null)
+      //v.setFiltersFailed(List[String]())
+      v.setReferenceAllele(null)
+      (v, vAnnotation)
+    })
+    // uniqueVariants.map(v => (v, v.getAnnotation))
   }
-  
-  def mergeAssociationsAndAnnotations(associations: Dataset[Association[A]], 
-                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association] {
-    
+
+  def mergeAssociationsAndAnnotations(associations: Dataset[Association[A]],
+                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association[A]] = {
+
+    // Map RDD[Association] to RDD[(Variant, Association)]
+    val keyedAnnotations = annotations
+    var keyedAssociations
+
+    associations.rdd.first().modelType match {
+      case "ADDITIVE_LINEAR" => {
+        keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearAssociation]]]
+        //keyedAssociations = associations.rdd.map(assoc => (assoc.variant, assoc.asInstanceOf[Association[AdditiveLinearAssociation]]))
+
+        val joinedAssocAnnot = keyedAnnotations.fullOuterJoin(keyedAssociations).map {
+          case (variant, (annotation, association)) => (association, annotation)
+        }
+        val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
+
+      }
+      case "DOMINANT_LINEAR" => {
+        keyedAssociations = associations.map(assoc => (assoc.variant, assoc.asInstanceOf[Association[AdditiveLinearAssociation]]))
+      }
+      case "ADDITIVE_LOGISTIC" => {
+        keyedAssociations = associations.map(assoc => (assoc.variant, assoc.asInstanceOf[Association[AdditiveLinearAssociation]]))
+      }
+      case "DOMINANT_LOGISTIC" => {
+        keyedAssociations = associations.map(assoc => (assoc.variant, assoc.asInstanceOf[Association[AdditiveLinearAssociation]]))
+      }
+    }
+
+
+
+//    val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
+//    val annotatedAssociations = assocExists.map(
+//      assocAnnotPair => {
+//        val (assoc, annot) = assocAnnotPair
+//        Association(assoc.variant, assoc.phenotype, assoc.logPValue, assoc.statistics, annot)
+//      })
+
+    sparkSession.createDataset(annotatedAssociations)
+
   }
 
   def loadFileAndCheckHeader(path: String, variablesString: String, isCovars: Boolean = false): (RDD[String], Array[String], Array[Int], String) = {

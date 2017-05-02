@@ -26,7 +26,7 @@ import org.apache.commons.math3.distribution.ChiSquaredDistribution
 import org.apache.commons.math3.linear
 import org.apache.commons.math3.linear.SingularMatrixException
 import org.apache.spark.mllib.regression.LabeledPoint
-import org.bdgenomics.formats.avro.Variant
+import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant }
 
 trait LogisticSiteRegression[VM <: VariantModel[VM]] extends SiteApplication[VM] {
 
@@ -259,7 +259,7 @@ trait AdditiveLogisticRegression extends LogisticSiteRegression[AdditiveLogistic
                            statistics: Map[String, Any],
                            variantAnnotation: Option[VariantAnnotation]): AdditiveLogisticAssociation = {
     new AdditiveLogisticAssociation(variantId, numSamples, modelType, weights, geneticParameterStandardError,
-      variant, phenotype, logPValue, pValue, statistics)
+      variant, phenotype, logPValue, pValue, statistics, None)
   }
 }
 
@@ -280,6 +280,6 @@ trait DominantLogisticRegression extends LogisticSiteRegression[AdditiveLogistic
                            statistics: Map[String, Any],
                            variantAnnotation: Option[VariantAnnotation]): DominantLogisticAssociation = {
     new DominantLogisticAssociation(variantId, numSamples, modelType, weights, geneticParameterStandardError,
-      variant, phenotype, logPValue, pValue, statistics)
+      variant, phenotype, logPValue, pValue, statistics, None)
   }
 }

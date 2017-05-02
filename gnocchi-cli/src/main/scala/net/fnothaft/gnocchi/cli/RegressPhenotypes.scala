@@ -63,7 +63,7 @@ class RegressPhenotypesArgs extends Args4jBase {
 
   @Argument(required = true, metaVar = "ASSOCIATIONS", usage = "The location to save associations to.", index = 3)
   var associations: String = _
-  
+
   @Args4jOption(required = false, name = "-annotate", usage = "Whether to include annotations.")
   var annotate = false
 
@@ -154,7 +154,7 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
                                        sc: SparkContext) = {
     val sparkSession = SparkSession.builder().getOrCreate()
     import sparkSession.implicits._
-    
+
     if (annotate) {
       sc.mergeAssociationsAndAnnotations(associations, annotations)
     }

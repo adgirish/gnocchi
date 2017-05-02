@@ -20,7 +20,7 @@ package net.fnothaft.gnocchi.rdd.association
 import net.fnothaft.gnocchi.models.variant.VariantModel
 import net.fnothaft.gnocchi.models.variant.linear.AdditiveLinearVariantModel
 import net.fnothaft.gnocchi.models.variant.logistic.AdditiveLogisticVariantModel
-import org.bdgenomics.formats.avro.Variant
+import org.bdgenomics.formats.avro.{ VariantAnnotation, Variant }
 
 trait Association[VM <: VariantModel[VM]] {
   implicit val myObjEncoder = org.apache.spark.sql.Encoders.kryo[Association[VM]]
@@ -34,7 +34,7 @@ trait Association[VM <: VariantModel[VM]] {
   val logPValue: Double
   val pValue: Double
   val statistics: Map[String, Any]
-  val VariantAnnotation: Option[VariantAnnotation]
+  val variantAnnotation: Option[VariantAnnotation]
 
   def toVariantModel: VM
 }
@@ -48,7 +48,8 @@ case class AdditiveLinearAssociation(variantId: String,
                                      phenotype: String,
                                      logPValue: Double,
                                      pValue: Double,
-                                     statistics: Map[String, Any]) extends Association[AdditiveLinearVariantModel] {
+                                     statistics: Map[String, Any],
+                                     variantAnnotation: Option[VariantAnnotation]) extends Association[AdditiveLinearVariantModel] {
   /**
    * Converts Association object into a VariantModel object of the
    * appropriate subtype.
@@ -85,7 +86,8 @@ case class AdditiveLogisticAssociation(variantId: String,
                                        phenotype: String,
                                        logPValue: Double,
                                        pValue: Double,
-                                       statistics: Map[String, Any]) extends Association[AdditiveLogisticVariantModel] {
+                                       statistics: Map[String, Any],
+                                       variantAnnotation: Option[VariantAnnotation]) extends Association[AdditiveLogisticVariantModel] {
   /**
    * Converts Association object into a VariantModel object of the
    * appropriate subtype.
@@ -110,7 +112,8 @@ case class DominantLinearAssociation(variantId: String,
                                      phenotype: String,
                                      logPValue: Double,
                                      pValue: Double,
-                                     statistics: Map[String, Any]) extends Association[AdditiveLinearVariantModel] {
+                                     statistics: Map[String, Any],
+                                     variantAnnotation: Option[VariantAnnotation]) extends Association[AdditiveLinearVariantModel] {
   /**
    * Converts Association object into a VariantModel object of the
    * appropriate subtype.
@@ -139,7 +142,8 @@ case class DominantLogisticAssociation(variantId: String,
                                        phenotype: String,
                                        logPValue: Double,
                                        pValue: Double,
-                                       statistics: Map[String, Any]) extends Association[AdditiveLogisticVariantModel] {
+                                       statistics: Map[String, Any],
+                                       variantAnnotation: Option[VariantAnnotation]) extends Association[AdditiveLogisticVariantModel] {
   /**
    * Converts Association object into a VariantModel object of the
    * appropriate subtype.
