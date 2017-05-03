@@ -257,7 +257,7 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
   }
 
   def mergeAssociationsAndAnnotations(associations: Dataset[Association[Any]],
-                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association[Any]] = {
+                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association[AdditiveLinearVariantModel]] = {
 
     def getJointAssociation(keyedAssociations: RDD[(Variant, Association[Any])]): RDD[(Association[Any], Option[VariantAnnotation])] = {
       val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
@@ -268,12 +268,17 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
     }
 
     associations.rdd.first().modelType match {
+        // Note: Put raw code from getJointAssociation method, error on create dataset encoding
       case "ADDITIVE_LINEAR" => {
         val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]].map(kA => (kA.variant, kA))
-        val assocExists = getJointAssociation(keyedAssociations)
+        val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
+          case (variant, (annotation, association)) => (association, annotation)
+        }
+        val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
         val annotatedAssociations = assocExists.map(a => AdditiveLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
         sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
       }
+        // Note: Using the function creates errors on return types
       case "DOMINANT_LINEAR" => {
         val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]].map(kA => (kA.variant, kA))
         val assocExists = getJointAssociation(keyedAssociations)
@@ -290,7 +295,7 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
         val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]].map(kA => (kA.variant, kA))
         val assocExists = getJointAssociation(keyedAssociations)
         val annotatedAssociations = assocExists.map(a => DominantLogisticAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
-        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
+        val r = sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
       }
     }
   }
