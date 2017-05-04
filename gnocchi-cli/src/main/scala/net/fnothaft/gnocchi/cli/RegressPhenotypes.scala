@@ -41,6 +41,7 @@ import net.fnothaft.gnocchi.rdd.genotype.GenotypeState
 import net.fnothaft.gnocchi.rdd.phenotype.Phenotype
 import org.apache.hadoop.fs.Path
 import net.fnothaft.gnocchi.sql.AuxEncoders
+import org.bdgenomics.formats.avro.{ Genotype, VariantAnnotation, Contig, Variant }
 
 object RegressPhenotypes extends BDGCommandCompanion {
   val commandName = "regressPhenotypes"
@@ -118,9 +119,9 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     val phenotypes = sc.loadPhenotypes(args.phenotypes, args.phenoName, args.oneTwo,
       args.includeCovariates, args.covarFile, args.covarNames)
 
-    if (annotate) {
-      val annotations = sc.loadAnnotations(args.associations, args.genotypes)
-    }
+    //    if (annotate) {
+    //      val annotations = sc.loadAnnotations(args.associations, args.genotypes)
+    //    }
 
     import net.fnothaft.gnocchi.sql.AuxEncoders._
 
@@ -128,23 +129,23 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
       case "ADDITIVE_LINEAR" => {
         val associations = AdditiveLinearRegression(genotypeStates, phenotypes)
         val assocsDS = sparkSession.createDataset(associations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
-        logResults[AdditiveLinearVariantModel](assocsDS, sc)
+        //logResults[AdditiveLinearVariantModel](assocsDS, sc)
       }
       case "DOMINANT_LINEAR" => {
         val associations = DominantLinearRegression(genotypeStates, phenotypes)
         val assocsDS = sparkSession.createDataset(associations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
-        logResults[AdditiveLinearVariantModel](assocsDS, sc)
+        //logResults[AdditiveLinearVariantModel](assocsDS, sc)
       }
       case "ADDITIVE_LOGISTIC" => {
         val associations = AdditiveLogisticRegression(genotypeStates, phenotypes)
         val assocsDS = sparkSession.createDataset(associations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
-        logResults[AdditiveLogisticVariantModel](assocsDS, sc)
+        //logResults[AdditiveLogisticVariantModel](assocsDS, sc)
 
       }
       case "DOMINANT_LOGISTIC" => {
         val associations = DominantLogisticRegression(genotypeStates, phenotypes)
         val assocsDS = sparkSession.createDataset(associations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
-        logResults[AdditiveLogisticVariantModel](assocsDS, sc)
+        //logResults[AdditiveLogisticVariantModel](assocsDS, sc)
       }
     }
   }
@@ -155,9 +156,9 @@ class RegressPhenotypes(protected val args: RegressPhenotypesArgs) extends BDGSp
     val sparkSession = SparkSession.builder().getOrCreate()
     import sparkSession.implicits._
 
-    if (annotate) {
-      sc.mergeAssociationsAndAnnotations(associations, annotations)
-    }
+    //    if (annotate) {
+    //      sc.mergeAssociationsAndAnnotations(associations, annotations)
+    //    }
 
     // save dataset
     val associationsFile = new Path(args.associations)

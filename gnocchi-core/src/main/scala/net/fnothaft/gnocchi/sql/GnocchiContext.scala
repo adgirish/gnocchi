@@ -201,7 +201,13 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
    * @param sc The spark context in which Gnocchi is running.
    * @return An RDD of VariantAnnotation objects.
    */
-  def loadAnnotations(associationPath: String, genotypesPath: String, adamDestination: String, overwrite: Boolean): RDD[(Variant, VariantAnnotation)] = {
+  def loadAnnotations(genotypesPath: String,
+                      adamDestination: String,
+                      ploidy: Int,
+                      mind: Double,
+                      maf: Double,
+                      geno: Double,
+                      overwrite: Boolean): RDD[(Variant, VariantAnnotation)] = {
     /*
      * Checks for existance of ADAM-formatted parquet files in output directory
      * Creates them if none exist.
@@ -219,21 +225,16 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
     //      Vcf2ADAM(cmdLine).run(sc)
     //    }
 
-    val absAdamDestination = new Path(adamDestination)
-    val fs = absAdamDestination.getFileSystem(sc.hadoopConfiguration)
-    // val absAssociationStr = fs.getFileStatus(relAssociationPath).getPath.toString
-    val parquetInputDestination = absAdamDestination.toString.split("/").reverse.drop(1).reverse.mkString("/") + "/parquetInputFiles/"
-    val parquetFiles = new Path(parquetInputDestination)
-
-    val vcfPath = genotypesPath
-
-    // check for ADAM formatted version of the file specified in genotypes. If it doesn't exist, convert vcf to parquet using vcf2adam.
-    if (!fs.exists(parquetFiles)) {
-      val cmdLine: Array[String] = Array[String](vcfPath, parquetInputDestination)
+    val absAssociationPath = new File(adamDestination).getAbsolutePath
+    val parquetInputDestination = absAssociationPath.split("/").reverse.drop(1)
+      .reverse.mkString("/") + "/annotationInputFiles/"
+    val parquetFiles = new File(parquetInputDestination)
+    if (!parquetFiles.getAbsoluteFile.exists) {
+      val cmdLine: Array[String] = Array[String](genotypesPath, parquetInputDestination)
       Vcf2ADAM(cmdLine).run(sc)
     } else if (overwrite) {
-      fs.delete(parquetFiles, true)
-      val cmdLine: Array[String] = Array[String](vcfPath, parquetInputDestination)
+      FileUtils.deleteDirectory(parquetFiles)
+      val cmdLine: Array[String] = Array[String](genotypesPath, parquetInputDestination)
       Vcf2ADAM(cmdLine).run(sc)
     }
 
@@ -253,52 +254,55 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
       v.setReferenceAllele(null)
       (v, vAnnotation)
     })
-    // uniqueVariants.map(v => (v, v.getAnnotation))
   }
 
-  def mergeAssociationsAndAnnotations(associations: Dataset[Association[Any]],
-                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association[AdditiveLinearVariantModel]] = {
+  def mergeAdditiveLinearAnnotations(associations: RDD[Association[AdditiveLinearVariantModel]],
+                                     annotations: RDD[(Variant, VariantAnnotation)]): Dataset[AdditiveLinearAssociation] = {
 
-    def getJointAssociation(keyedAssociations: RDD[(Variant, Association[Any])]): RDD[(Association[Any], Option[VariantAnnotation])] = {
-      val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
-        case (variant, (annotation, association)) => (association, annotation)
-      }
-      val validAssoc = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
-      validAssoc
+    val keyedAssociations = associations.map(kA => (kA.variant, kA))
+    val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
+      case (variant, (annotation, association)) => (association, annotation)
     }
-
-    associations.rdd.first().modelType match {
-        // Note: Put raw code from getJointAssociation method, error on create dataset encoding
-      case "ADDITIVE_LINEAR" => {
-        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]].map(kA => (kA.variant, kA))
-        val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
-          case (variant, (annotation, association)) => (association, annotation)
-        }
-        val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
-        val annotatedAssociations = assocExists.map(a => AdditiveLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
-        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
-      }
-        // Note: Using the function creates errors on return types
-      case "DOMINANT_LINEAR" => {
-        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]].map(kA => (kA.variant, kA))
-        val assocExists = getJointAssociation(keyedAssociations)
-        val annotatedAssociations = assocExists.map(a => DominantLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
-        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
-      }
-      case "ADDITIVE_LOGISTIC" => {
-        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]].map(kA => (kA.variant, kA))
-        val assocExists = getJointAssociation(keyedAssociations)
-        val annotatedAssociations = assocExists.map(a => AdditiveLogisticAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
-        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
-      }
-      case "DOMINANT_LOGISTIC" => {
-        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]].map(kA => (kA.variant, kA))
-        val assocExists = getJointAssociation(keyedAssociations)
-        val annotatedAssociations = assocExists.map(a => DominantLogisticAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
-        val r = sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
-      }
-    }
+    val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
+    val annotatedAssociations = assocExists.map(a => AdditiveLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
+    sparkSession.createDataset(annotatedAssociations)
   }
+
+  //  def mergeAssociationsAndAnnotations(associations: Dataset[Association[Any]],
+  //                                      annotations: RDD[(Variant, VariantAnnotation)]): Dataset[Association[AdditiveLinearVariantModel]] = {
+  //
+  //    associations.rdd.first().modelType match {
+  //        // Note: Put raw code from getJointAssociation method, error on create dataset encoding
+  //      case "ADDITIVE_LINEAR" => {
+  //        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]].map(kA => (kA.variant, kA))
+  //        val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
+  //          case (variant, (annotation, association)) => (association, annotation)
+  //        }
+  //        val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
+  //        val annotatedAssociations = assocExists.map(a => AdditiveLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
+  //        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
+  //      }
+  //        // Note: Using the function creates errors on return types
+  //      case "DOMINANT_LINEAR" => {
+  //        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]].map(kA => (kA.variant, kA))
+  //        val assocExists = getJointAssociation(keyedAssociations)
+  //        val annotatedAssociations = assocExists.map(a => DominantLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
+  //        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLinearVariantModel]]])
+  //      }
+  //      case "ADDITIVE_LOGISTIC" => {
+  //        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]].map(kA => (kA.variant, kA))
+  //        val assocExists = getJointAssociation(keyedAssociations)
+  //        val annotatedAssociations = assocExists.map(a => AdditiveLogisticAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
+  //        sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
+  //      }
+  //      case "DOMINANT_LOGISTIC" => {
+  //        val keyedAssociations = associations.rdd.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]].map(kA => (kA.variant, kA))
+  //        val assocExists = getJointAssociation(keyedAssociations)
+  //        val annotatedAssociations = assocExists.map(a => DominantLogisticAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
+  //        val r = sparkSession.createDataset(annotatedAssociations.asInstanceOf[RDD[Association[AdditiveLogisticVariantModel]]])
+  //      }
+  //    }
+  //  }
 
   def loadFileAndCheckHeader(path: String, variablesString: String, isCovars: Boolean = false): (RDD[String], Array[String], Array[Int], String) = {
     val lines = sc.textFile(path).persist()
