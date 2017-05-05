@@ -40,7 +40,7 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
     val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
 
-    val variantAnnotationRDD = sc.loadAnnotations(genoFilePath, destination, 1, 0.1, 0.1, 0.1, false)
+    val variantAnnotationRDD = sc.loadAnnotations(genoFilePath, destination, false)
 
     assert(variantAnnotationRDD.count === 5)
 
@@ -57,27 +57,33 @@ class AnnotatedVCFHandlingSuite extends GnocchiFunSuite {
     assert(variantAnnotationRDD.first._2.getSomatic === false)
     assert(variantAnnotationRDD.first._2.getAttributes.get("ClippingRankSum") == "-2.196")
   }
-  //
-  //  sparkTest("Joining Annotation and Assocation RDDs") {
-  //    val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
-  //    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
-  //
-  //    val variantAnnotationRDD = gc.loadAnnotations(phenoFilePath, genoFilePath, destination, false) //RegressPhenotypes(cliArgs).loadAnnotations(sc)
-  //
-  //    val genotypeStates = gc.loadAndFilterGenotypes(genoFilePath, destination, 1, 0.1, 0.1, 0.1, false)
-  //    val phenotypes = gc.loadPhenotypes(phenoFilePath, "pheno1", false, false, Option.empty[String], Option.empty[String])
-  //    val regressionResult = AdditiveLinearRegression(genotypeStates, phenotypes)
-  //
-  //    val annotatedAssociations = gc.mergeAdditiveLinearAnnotations(regressionResult, variantAnnotationRDD)
-  //
-  //    assert(annotatedAssociations.first.variant.getContigName === "1_14400_C")
-  //    assert(annotatedAssociations.first.variant.getAlternateAllele === "C")
-  //    assert(annotatedAssociations.first.variantAnnotation.isDefined === true)
-  //    assert(annotatedAssociations.first.variantAnnotation.get.getAlleleCount == 2)
-  //    assert(annotatedAssociations.first.variantAnnotation.get.getAlleleFrequency == 0.333f)
-  //    assert(annotatedAssociations.first.variantAnnotation.get.getSomatic == false)
-  //    assert(annotatedAssociations.first.variantAnnotation.get.getAttributes.get("ClippingRankSum") == "0.138")
-  //  }
+
+  sparkTest("Joining Annotation and Assocation RDDs") {
+    val genoFilePath = ClassLoader.getSystemClassLoader.getResource("small_snpeff.vcf").getFile
+    val phenoFilePath = ClassLoader.getSystemClassLoader.getResource("2Liner_annot.txt").getFile
+
+    val variantAnnotationRDD = sc.loadAnnotations(genoFilePath, destination, false)
+
+    val genotypeStates = sc.loadAndFilterGenotypes(genoFilePath, destination, 1, 0.1, 0.1, 0.1, false)
+    val phenotypes = sc.loadPhenotypes(phenoFilePath, "pheno1", false, false, Option.empty[String], Option.empty[String])
+    val regressionResult = AdditiveLinearRegression(genotypeStates, phenotypes)
+
+    println("----22222----")
+    phenotypes.foreach(println(_))
+    println("-------------")
+
+    val annotatedAssociations = sc.mergeAdditiveLinearAnnotations(regressionResult, variantAnnotationRDD)
+
+    assert(annotatedAssociations.count() == 5)
+
+    assert(annotatedAssociations.first.variant.getContigName === "1_14400_C")
+    assert(annotatedAssociations.first.variant.getAlternateAllele === "C")
+    assert(annotatedAssociations.first.variantAnnotation.isDefined === true)
+    assert(annotatedAssociations.first.variantAnnotation.get.getAlleleCount == 2)
+    assert(annotatedAssociations.first.variantAnnotation.get.getAlleleFrequency == 0.333f)
+    assert(annotatedAssociations.first.variantAnnotation.get.getSomatic == false)
+    assert(annotatedAssociations.first.variantAnnotation.get.getAttributes.get("ClippingRankSum") == "0.138")
+  }
   //
   //  sparkTest("Annotations being successfully written to output log file") {
   //

@@ -203,28 +203,11 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
    */
   def loadAnnotations(genotypesPath: String,
                       adamDestination: String,
-                      ploidy: Int,
-                      mind: Double,
-                      maf: Double,
-                      geno: Double,
                       overwrite: Boolean): RDD[(Variant, VariantAnnotation)] = {
     /*
      * Checks for existance of ADAM-formatted parquet files in output directory
      * Creates them if none exist.
      */
-    //    val absAssociationPath = new File(args.associations).getAbsolutePath
-    //    val parquetInputDestination = absAssociationPath.split("/").reverse.drop(1)
-    //      .reverse.mkString("/") + "/annotationInputFiles/"
-    //    val parquetFiles = new File(parquetInputDestination)
-    //    if (!parquetFiles.getAbsoluteFile.exists) {
-    //      val cmdLine: Array[String] = Array[String](args.genotypes, parquetInputDestination)
-    //      Vcf2ADAM(cmdLine).run(sc)
-    //    } else if (args.overwrite) {
-    //      FileUtils.deleteDirectory(parquetFiles)
-    //      val cmdLine: Array[String] = Array[String](args.genotypes, parquetInputDestination)
-    //      Vcf2ADAM(cmdLine).run(sc)
-    //    }
-
     val absAssociationPath = new File(adamDestination).getAbsolutePath
     val parquetInputDestination = absAssociationPath.split("/").reverse.drop(1)
       .reverse.mkString("/") + "/annotationInputFiles/"
@@ -257,15 +240,21 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
   }
 
   def mergeAdditiveLinearAnnotations(associations: RDD[Association[AdditiveLinearVariantModel]],
-                                     annotations: RDD[(Variant, VariantAnnotation)]): Dataset[AdditiveLinearAssociation] = {
+                                     annotations: RDD[(Variant, VariantAnnotation)]): RDD[AdditiveLinearAssociation] = {
 
     val keyedAssociations = associations.map(kA => (kA.variant, kA))
+
+    println("----11111----")
+    annotations.foreach(println(_))
+    println("-------------")
+
     val joinedAssocAnnot = annotations.fullOuterJoin(keyedAssociations).map {
       case (variant, (annotation, association)) => (association, annotation)
     }
     val assocExists = joinedAssocAnnot.filter(_._1.isDefined).map(assocAnnotPair => (assocAnnotPair._1.get, assocAnnotPair._2))
     val annotatedAssociations = assocExists.map(a => AdditiveLinearAssociation(a._1.variantId, a._1.numSamples, a._1.modelType, a._1.weights, a._1.geneticParameterStandardError, a._1.variant, a._1.phenotype, a._1.logPValue, a._1.pValue, a._1.statistics, a._2))
-    sparkSession.createDataset(annotatedAssociations)
+
+    annotatedAssociations
   }
 
   //  def mergeAssociationsAndAnnotations(associations: Dataset[Association[Any]],
@@ -334,6 +323,7 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
       val index = columnLabels.map(p => p._1).indexOf(variable)
       require(index != -1, s"$variable doesn't match any of the phenotypes specified in the header.")
     }
+
     (lines, columnLabels.map(p => p._1), columnLabels.map(p => p._2), delimiter)
   }
 
@@ -395,6 +385,9 @@ class GnocchiContext(@transient val sc: SparkContext) extends Serializable with 
         indices.map(index => fullHeader(index)).mkString(","), p(0), indices.map(i => p(i).toDouble).toArray))
 
     phenotypes.unpersist()
+
+    println("+++++")
+    data.map(p => p._2.mkString(", ")).foreach(println(_))
 
     finalData
   }
