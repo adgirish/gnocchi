@@ -17,3 +17,49 @@
   */
 
 // (TODO) Add boilerplate for Java wrapper onto Gnocchi
+
+package net.fnothaft.gnocchi.api.java
+
+import org.apache.spark.api.java.JavaSparkContext
+import org.bdgenomics.adam.rdd.ADAMContext
+
+object JavaGnocchiSession {
+  // convert to and from java/scala implementation
+  implicit def fromGnocchiSession(gs: GnocchiSession): JavaGnocchiSession = new JavaGnocchiSession(gs)
+  implicit def toGnocchiSession(jgs: JavaGnocchiSession): GnocchiSession = jgs.gs
+}
+
+/**
+ * The JavaGnocchiSession provides java-friendly functions on top of GnocchiSession.
+ *
+ * @param gs The GnocchiSession to wrap.
+ */
+ class JavaGnocchiSession(val gs: GnocchiSession) extends Serializable {
+
+  /**
+   * @return Returns the Gnocchi Spark Context associated with this Java Gnocchi Session.
+   */
+  def getSparkContext: JavaSparkContext = new JavaSparkContext(gs.sc)
+
+  def filterSamples(genotypes: Dataset[CalledVariant], mind: Double, ploidy: Double): Dataset[CalledVariant] = {
+    return
+  }
+
+  def filterVariants(genotypes: Dataset[CalledVariant], geno: Double, maf: Double): Dataset[CalledVariant] = {
+    return
+  }
+
+  def loadGenotypes(genotypesPath: String): Dataset[CalledVariant] = {
+    return 
+  }
+
+  def loadPhenotypes(phenotypesPath: String,
+                     primaryID: String,
+                     phenoName: String,
+                     delimiter: String,
+                     covarPath: Option[String] = None,
+                     covarNames: Option[List[String]] = None): Map[String, BetterPhenotype] = {
+    return 
+  }
+
+ }
