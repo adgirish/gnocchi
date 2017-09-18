@@ -41,18 +41,30 @@ object JavaGnocchiSession {
    */
   def getSparkContext: JavaSparkContext = new JavaSparkContext(gs.sc)
 
+  /**
+   * (TODO) Add comments
+   */
   def filterSamples(genotypes: Dataset[CalledVariant], mind: Double, ploidy: Double): Dataset[CalledVariant] = {
     return
   }
 
+  /**
+   * (TODO) Add comments
+   */
   def filterVariants(genotypes: Dataset[CalledVariant], geno: Double, maf: Double): Dataset[CalledVariant] = {
     return
   }
 
+  /**
+   * (TODO) Add comments
+   */
   def loadGenotypes(genotypesPath: String): Dataset[CalledVariant] = {
     return 
   }
 
+  /**
+   * (TODO) Add comments
+   */
   def loadPhenotypes(phenotypesPath: String,
                      primaryID: String,
                      phenoName: String,
