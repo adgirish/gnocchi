@@ -1,3 +1,4 @@
+#
 # Licensed to Big Data Genomics (BDG) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -13,28 +14,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-class GnocchiSession(object):
-    """
-    """
+from setuptools import find_packages, setup
+from version import version as gnocchi_version
 
-
-    def __init__(self, sc):
-        pass
-
-    def filterSamples(self, genotypesDataset, mind, ploidy):
-        return
-
-    def filterVariants(self, genotypesDataset, geno, maf):
-        return
-
-    def loadGenotypes(self, genotypesPath):
-        return
-
-    def loadPhenotypes(self,
-                       phenotypesPath,
-                       primaryID,
-                       phenoName,
-                       delimited,
-                       covarPath,
-                       covarNames):
+setup(
+    name='bdgenomics.gnocchi',
+    version=gnocchi_version,
+    description='gnocchi: Genotype store and query engine',
+    author='',
+    author_email='',
+    url="https://github.com/bdgenomics/gnocchi",
+    install_requires=[],
+    packages=find_packages(exclude=['*.test.*']))

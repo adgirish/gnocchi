@@ -1,3 +1,4 @@
+#
 # Licensed to Big Data Genomics (BDG) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -13,28 +14,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
-class GnocchiSession(object):
-    """
-    """
+version = '0.0.1-SNAPSHOT'
 
-
-    def __init__(self, sc):
-        pass
-
-    def filterSamples(self, genotypesDataset, mind, ploidy):
-        return
-
-    def filterVariants(self, genotypesDataset, geno, maf):
-        return
-
-    def loadGenotypes(self, genotypesPath):
-        return
-
-    def loadPhenotypes(self,
-                       phenotypesPath,
-                       primaryID,
-                       phenoName,
-                       delimited,
-                       covarPath,
-                       covarNames):
+if __name__ == '__main__':
+    print version
