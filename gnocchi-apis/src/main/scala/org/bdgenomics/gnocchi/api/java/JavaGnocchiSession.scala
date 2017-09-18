@@ -73,5 +73,4 @@ object JavaGnocchiSession {
                      covarNames: Option[List[String]] = None): Map[String, BetterPhenotype] = {
     return 
   }
-
- }
+}
