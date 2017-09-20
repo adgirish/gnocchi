@@ -22,6 +22,7 @@ package net.fnothaft.gnocchi.api.java
 
 import org.apache.spark.api.java.JavaSparkContext
 import org.bdgenomics.adam.rdd.ADAMContext
+import net.fnothaft.gnocchi.sql.GnocchiSession
 
 object JavaGnocchiSession {
   // convert to and from java/scala implementation
