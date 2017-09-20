@@ -29,6 +29,8 @@ object JavaGnocchiSession {
   implicit def toGnocchiSession(jgs: JavaGnocchiSession): GnocchiSession = jgs.gs
 }
 
+// (TODO) Write custom Dataset[CalledVariant] in Python file
+
 /**
  * The JavaGnocchiSession provides java-friendly functions on top of GnocchiSession.
  *
@@ -44,33 +46,38 @@ object JavaGnocchiSession {
   /**
    * (TODO) Add comments
    */
-  def filterSamples(genotypes: Dataset[CalledVariant], mind: Double, ploidy: Double): Dataset[CalledVariant] = {
-    return
+  def filterSamples(genotypes: Dataset[CalledVariant], mind: java.lang.Double, ploidy: java.lang.Double): Dataset[CalledVariant] = {
+    gs.filterSamples(genotypes, mind, ploidy)
   }
 
   /**
    * (TODO) Add comments
    */
-  def filterVariants(genotypes: Dataset[CalledVariant], geno: Double, maf: Double): Dataset[CalledVariant] = {
-    return
+  def filterVariants(genotypes: Dataset[CalledVariant], geno: java.lang.Double, maf: java.lang.Double): Dataset[CalledVariant] = {
+    gs.filterVariants(genotypes, geno, maf)
   }
 
   /**
    * (TODO) Add comments
    */
-  def loadGenotypes(genotypesPath: String): Dataset[CalledVariant] = {
-    return 
+  def loadGenotypes(genotypesPath: java.lang.String): Dataset[CalledVariant] = {
+    gs.loadGenotypes(genotypesPath)
   }
 
   /**
    * (TODO) Add comments
    */
-  def loadPhenotypes(phenotypesPath: String,
-                     primaryID: String,
-                     phenoName: String,
-                     delimiter: String,
+  def loadPhenotypes(phenotypesPath: java.lang.String,
+                     primaryID: java.lang.String,
+                     phenoName: java.lang.String,
+                     delimiter: java.lang.String,
                      covarPath: Option[String] = None,
                      covarNames: Option[List[String]] = None): Map[String, BetterPhenotype] = {
-    return 
+    gs.loadPhenotypes(phenotypesPath,
+                      primaryID,
+                      phenoName,
+                      delimiter,
+                      covarPath,
+                      covarNames)
   }
 }
