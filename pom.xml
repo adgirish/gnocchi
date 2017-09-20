@@ -19,6 +19,7 @@
   <modules>
     <module>gnocchi-core</module>
     <module>gnocchi-cli</module>
+    <module>gnocchi-apis</module>
   </modules>
   <licenses>
     <license>
@@ -283,6 +284,11 @@
         <version>${project.version}</version>
       </dependency>
       <dependency>
+        <groupId>net.fnothaft</groupId>
+        <artifactId>gnocchi-apis_2.10</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.avro</groupId>
         <artifactId>avro</artifactId>
         <version>${avro.version}</version>
@@ -502,6 +508,7 @@
               <sourceDirectories>
                 <param>gnocchi-core/src/main/scala</param>
                 <param>gnocchi-cli/src/main/scala</param>
+                <param>gnocchi-apis/src/main/scala</param>
               </sourceDirectories>
             </configuration>
           </plugin>

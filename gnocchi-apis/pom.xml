@@ -9,9 +9,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>gnocchi-core_2.10</artifactId>
+  <artifactId>gnocchi-apis_2.10</artifactId>
   <packaging>jar</packaging>
-  <name>gnocchi-core: Core APIs and queries</name>
+  <name>gnocchi-apis: Core APIs and queries</name>
 
   <build>
     <plugins>
