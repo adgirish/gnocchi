@@ -25,13 +25,13 @@ class CalledVariantDataset(object):
         return self._jvmDS
 
 
-class BetterPhenotype(object):
+class Phenotype(object):
 
     def __init__(self, bp, sc):
-        self._jvmBetterPhenotype = bp
+        self._jvmPhenotype = bp
         self.sc = sc
 
-class BetterPhenotypeMap(object):
+class PhenotypeMap(object):
 
     def __init__(self, jvmMap, sc, jgs):
         self._jvmMap = jvmMap
@@ -42,5 +42,5 @@ class BetterPhenotypeMap(object):
         return self._jvmMap
 
     def getKey(self, k):
-        bp = self._jgs.getBetterPhenotypeByKey(self._jvmMap, k)
-        return BetterPhenotype(bp, self.sc)
+        bp = self._jgs.getPhenotypeByKey(self._jvmMap, k)
+        return Phenotype(bp, self.sc)

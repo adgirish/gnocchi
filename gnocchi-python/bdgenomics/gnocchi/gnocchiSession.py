@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from bdgenomics.gnocchi.rdd import CalledVariantDataset, BetterPhenotypeMap
-
+from org.bdgenomics.gnocchi.rdd import CalledVariantDataset, PhenotypeMap
 
 class GnocchiSession(object):
     """
@@ -44,4 +43,4 @@ class GnocchiSession(object):
         bpMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
                                           delimited, covarPath, covarNames)
 
-        return BetterPhenotypeMap(bpMap, self._sc, self.__jgs)
+        return PhenotypeMap(bpMap, self._sc, self.__jgs)

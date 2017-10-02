@@ -9,9 +9,9 @@
     <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <artifactId>gnocchi-apis_2.10</artifactId>
+  <artifactId>gnocchi-apis.10</artifactId>
   <packaging>jar</packaging>
-  <name>gnocchi-apis: Core APIs and queries</name>
+  <name>gnocchi-apis: Alterate language APIs</name>
 
   <build>
     <plugins>
@@ -23,6 +23,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
       </plugin>
+      <!-- disable surefire -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -61,6 +62,11 @@
     <dependency>
       <groupId>org.apache.parquet</groupId>
       <artifactId>parquet-avro</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.fnothaft</groupId>
+      <artifactId>gnocchi-core_2.10</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.bdgenomics.utils</groupId>

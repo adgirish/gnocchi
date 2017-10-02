@@ -20,7 +20,10 @@
 
 package net.fnothaft.gnocchi.api.java
 
+import net.fnothaft.gnocchi.primitives.phenotype.Phenotype
+import net.fnothaft.gnocchi.primitives.variants.CalledVariant
 import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.sql.Dataset
 import org.bdgenomics.adam.rdd.ADAMContext
 import net.fnothaft.gnocchi.sql.GnocchiSession
 
@@ -30,7 +33,7 @@ object JavaGnocchiSession {
   implicit def toGnocchiSession(jgs: JavaGnocchiSession): GnocchiSession = jgs.gs
 }
 
-// (TODO) Write custom Dataset[CalledVariant] in Python file
+// (TODO) Write regressPhenotype functionality
 
 /**
  * The JavaGnocchiSession provides java-friendly functions on top of GnocchiSession.
@@ -61,8 +64,8 @@ object JavaGnocchiSession {
   /**
    * (TODO) Add comments
    */
-  def loadGenotypes(genotypesPath: java.lang.String): Dataset[CalledVariant] = {
-    gs.loadGenotypes(genotypesPath)
+  def loadGenotypesAsText(genotypesPath: java.lang.String): Dataset[CalledVariant] = {
+    gs.loadGenotypesAsText(genotypesPath)
   }
 
   /**
@@ -73,7 +76,7 @@ object JavaGnocchiSession {
                      phenoName: java.lang.String,
                      delimiter: java.lang.String,
                      covarPath: Option[String] = None,
-                     covarNames: Option[List[String]] = None): Map[String, BetterPhenotype] = {
+                     covarNames: Option[List[String]] = None): Map[String, Phenotype] = {
     gs.loadPhenotypes(phenotypesPath,
                       primaryID,
                       phenoName,
@@ -83,9 +86,9 @@ object JavaGnocchiSession {
   }
 
   /**
-   * (TODO) Add comments
+   * (TODO) Add commentsee
    */
-  def getBetterPhenotypeByKey(betterPhenotypeMap: Map[String, BetterPhenotype], key: java.lang.String): BetterPhenotype = {
+  def getBetterPhenotypeByKey(betterPhenotypeMap: Map[String, Phenotype], key: java.lang.String): Phenotype = {
     betterPhenotypeMap(key)
   }
 }
