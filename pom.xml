@@ -20,6 +20,7 @@
     <module>gnocchi-core</module>
     <module>gnocchi-cli</module>
     <module>gnocchi-apis</module>
+    <module>gnocchi-python</module>
   </modules>
   <licenses>
     <license>
@@ -517,6 +518,7 @@
                 <param>gnocchi-core/src/main/scala</param>
                 <param>gnocchi-cli/src/main/scala</param>
                 <param>gnocchi-apis/src/main/scala</param>
+                <param>gnocchi-python/src/main/scala</param>
               </sourceDirectories>
             </configuration>
           </plugin>
