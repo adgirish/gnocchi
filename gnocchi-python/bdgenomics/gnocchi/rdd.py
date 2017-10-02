@@ -16,16 +16,31 @@
 
 
 class CalledVariantDataset(object):
-    # TODO(kunalgosar): Write proper datastructures to hold CalledVariantDataset
 
     def __init__(self, jvmDS, sc):
         self._jvmDS = jvmDS
         self.sc = sc
 
+    def get(self):
+        return self._jvmDS
+
 
 class BetterPhenotype(object):
-    # TODO(kunalgosar): Write proper datastructures to hold BetterPhenotype
 
-    def __init__(self, obj, sc):
-        self._obj = obj
+    def __init__(self, bp, sc):
+        self._jvmBetterPhenotype = bp
         self.sc = sc
+
+class BetterPhenotypeMap(object):
+
+    def __init__(self, jvmMap, sc, jgs):
+        self._jvmMap = jvmMap
+        self.sc = sc
+        self._jgs = jgs
+
+    def get(self):
+        return self._jvmMap
+
+    def getKey(self, k):
+        bp = self._jgs.getBetterPhenotypeByKey(self._jvmMap, k)
+        return BetterPhenotype(bp, self.sc)

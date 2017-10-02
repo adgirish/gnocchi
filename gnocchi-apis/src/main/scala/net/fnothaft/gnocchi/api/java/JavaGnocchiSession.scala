@@ -81,4 +81,11 @@ object JavaGnocchiSession {
                       covarPath,
                       covarNames)
   }
+
+  /**
+   * (TODO) Add comments
+   */
+  def getBetterPhenotypeByKey(betterPhenotypeMap: Map[String, BetterPhenotype], key: java.lang.String): BetterPhenotype = {
+    betterPhenotypeMap(key)
+  }
 }

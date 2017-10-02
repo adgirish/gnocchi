@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from bdgenomics.gnocchi.rdd import CalledVariantDataset, BetterPhenotype
-
+from bdgenomics.gnocchi.rdd import CalledVariantDataset, BetterPhenotypeMap
 
 
 class GnocchiSession(object):
@@ -29,11 +28,11 @@ class GnocchiSession(object):
         self.__jgs = sc._jvm.net.fnothaft.gnocchi.api.java.JavaGnocchiSession(session)
 
     def filterSamples(self, genotypesDataset, mind, ploidy):
-        dataset = self.__jgs.filterSamples(genotypesDataset, mind, ploidy)
+        dataset = self.__jgs.filterSamples(genotypesDataset.get(), mind, ploidy)
         return CalledVariantDataset(dataset, self._sc)
 
     def filterVariants(self, genotypesDataset, geno, maf):
-        dataset = self.__jgs.filterVariants(genotypesDataset, geno, maf)
+        dataset = self.__jgs.filterVariants(genotypesDataset.get(), geno, maf)
         return CalledVariantDataset(dataset, self._sc)
 
     def loadGenotypes(self, genotypesPath):
@@ -41,8 +40,8 @@ class GnocchiSession(object):
         return CalledVariantDataset(dataset, self._sc)
 
     def loadPhenotypes(self, phenotypesPath, primaryID, phenoName, delimited,
-        covarPath=None, covarNames=None):
-         betterPhenotypeMap = self.__jgs.loadPhenotypes(phenotypesPath, \
-            primaryID, phenoName, delimited, covarPath, covarNames)
-        # TODO(kunalgosar): Cast values in map to BetterPhenotype
-        return betterPhenotypeMap
+                       covarPath=None, covarNames=None):
+        bpMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
+                                          delimited, covarPath, covarNames)
+
+        return BetterPhenotypeMap(bpMap, self._sc, self.__jgs)
