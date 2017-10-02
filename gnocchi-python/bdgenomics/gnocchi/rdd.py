@@ -27,8 +27,8 @@ class CalledVariantDataset(object):
 
 class Phenotype(object):
 
-    def __init__(self, bp, sc):
-        self._jvmPhenotype = bp
+    def __init__(self, p, sc):
+        self._jvmPhenotype = p
         self.sc = sc
 
 class PhenotypeMap(object):
@@ -42,5 +42,5 @@ class PhenotypeMap(object):
         return self._jvmMap
 
     def getKey(self, k):
-        bp = self._jgs.getPhenotypeByKey(self._jvmMap, k)
-        return Phenotype(bp, self.sc)
+        p = self._jgs.getPhenotypeByKey(self._jvmMap, k)
+        return Phenotype(p, self.sc)
