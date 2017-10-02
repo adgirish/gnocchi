@@ -31,6 +31,8 @@ object JavaGnocchiSession {
 }
 
 // (TODO) Write custom Dataset[CalledVariant] in Python file
+// (TODO) Write regressPhenotype functionality
+// (TODO) Write accessor functions for Dataset[CalledVariant]
 
 /**
  * The JavaGnocchiSession provides java-friendly functions on top of GnocchiSession.
