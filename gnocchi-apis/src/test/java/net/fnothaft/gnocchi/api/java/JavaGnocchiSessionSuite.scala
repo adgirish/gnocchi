@@ -16,4 +16,32 @@
  * limitations under the License.
  */
 
-// (TODO) Add boilerplate for Java wrapper onto Gnocchi
+package net.fnothaft.gnocchi.api
+
+import net.fnothaft.gnocchi.api.java.{ GnocchiFunSuite, JavaGnocchiSession }
+import net.fnothaft.gnocchi.primitives.variants.CalledVariant
+import net.fnothaft.gnocchi.sql.GnocchiSession
+import org.apache.spark.SparkContext
+import org.mockito.Mockito
+import org.apache.spark.sql.Dataset
+import org.scalatest.FunSuite // (TODO) Replace with GnocchiFunSuite
+
+class JavaGnocchiSessionSuite extends GnocchiFunSuite {
+  sparkTest("Creating JavaGnocchiSession") {
+    val gs = new GnocchiSession(sc)
+    val jgs = new JavaGnocchiSession(gs)
+  }
+
+  sparkTest("Verify filterSamples makes correct call to GnocchiSession") {
+    val gs = Mockito.mock(classOf[GnocchiSession])
+    val jgs = new JavaGnocchiSession(gs)
+
+    val mockGenotype = Mockito.mock(classOf[Dataset[CalledVariant]])
+    val mockMind = 0.0
+    val mockPloidy = 0.0
+
+    jgs.filterSamples(mockGenotype, mockMind, mockPloidy)
+
+    Mockito.verify(gs).filterSamples(mockGenotype, mockMind, mockPloidy)
+  }
+}
