@@ -40,7 +40,6 @@ class GnocchiSession(object):
 
     def loadPhenotypes(self, phenotypesPath, primaryID, phenoName, delimited,
                        covarPath=None, covarNames=None):
-        bpMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
+        phenoMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
                                           delimited, covarPath, covarNames)
-
-        return PhenotypeMap(bpMap, self._sc, self.__jgs)
+        return PhenotypeMap(phenoMap, self._sc, self.__jgs)

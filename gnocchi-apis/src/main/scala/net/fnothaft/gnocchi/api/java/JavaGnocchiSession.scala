@@ -1,20 +1,20 @@
 /**
-  * Licensed to Big Data Genomics (BDG) under one
-  * or more contributor license agreements.  See the NOTICE file
-  * distributed with this work for additional information
-  * regarding copyright ownership.  The BDG licenses this file
-  * to you under the Apache License, Version 2.0 (the
-  * "License"); you may not use this file except in compliance
-  * with the License.  You may obtain a copy of the License at
-  *
-  *     http://www.apache.org/licenses/LICENSE-2.0
-  *
-  * Unless required by applicable law or agreed to in writing, software
-  * distributed under the License is distributed on an "AS IS" BASIS,
-  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  * See the License for the specific language governing permissions and
-  * limitations under the License.
-  */
+ * Licensed to Big Data Genomics (BDG) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The BDG licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 // (TODO) Add boilerplate for Java wrapper onto Gnocchi
 
@@ -40,7 +40,7 @@ object JavaGnocchiSession {
  *
  * @param gs The GnocchiSession to wrap.
  */
- class JavaGnocchiSession(val gs: GnocchiSession) extends Serializable {
+class JavaGnocchiSession(val gs: GnocchiSession) extends Serializable {
 
   /**
    * @return Returns the Gnocchi Spark Context associated with this Java Gnocchi Session.
@@ -78,11 +78,11 @@ object JavaGnocchiSession {
                      covarPath: Option[String] = None,
                      covarNames: Option[List[String]] = None): Map[String, Phenotype] = {
     gs.loadPhenotypes(phenotypesPath,
-                      primaryID,
-                      phenoName,
-                      delimiter,
-                      covarPath,
-                      covarNames)
+      primaryID,
+      phenoName,
+      delimiter,
+      covarPath,
+      covarNames)
   }
 
   /**
