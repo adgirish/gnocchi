@@ -14,8 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 # (TODO) Correct pathing
 from rdd import CalledVariantDataset, PhenotypeMap
+=======
+from org.bdgenomics.gnocchi.rdd import CalledVariantDataset, PhenotypeMap
+>>>>>>> 1a9087463773a384ada103e305b368de2286207a
 
 class GnocchiSession(object):
     """
@@ -41,7 +45,11 @@ class GnocchiSession(object):
 
     def loadPhenotypes(self, phenotypesPath, primaryID, phenoName, delimited,
                        covarPath=None, covarNames=None):
-        bpMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
+        phenoMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
                                           delimited, covarPath, covarNames)
 
+<<<<<<< HEAD
         return PhenotypeMap(bpMap, self._sc, self.__jgs)
+=======
+        return PhenotypeMap(phenoMap, self._sc, self.__jgs)
+>>>>>>> 1a9087463773a384ada103e305b368de2286207a

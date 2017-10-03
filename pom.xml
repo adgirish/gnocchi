@@ -20,6 +20,7 @@
     <module>gnocchi-core</module>
     <module>gnocchi-cli</module>
     <module>gnocchi-apis</module>
+    <module>gnocchi-python</module>
   </modules>
   <licenses>
     <license>
@@ -428,8 +429,10 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
+  
   <profiles>
     <profile>
+      <id>python</id>
       <modules>
         <module>gnocchi-core</module>
         <module>gnocchi-apis</module>

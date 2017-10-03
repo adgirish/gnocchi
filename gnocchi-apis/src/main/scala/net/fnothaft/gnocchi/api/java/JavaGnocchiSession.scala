@@ -86,7 +86,7 @@ class JavaGnocchiSession(val gs: GnocchiSession) extends Serializable {
   }
 
   /**
-   * (TODO) Add comments
+   * (TODO) Add commentsee
    */
   def getBetterPhenotypeByKey(betterPhenotypeMap: Map[String, Phenotype], key: java.lang.String): Phenotype = {
     betterPhenotypeMap(key)
