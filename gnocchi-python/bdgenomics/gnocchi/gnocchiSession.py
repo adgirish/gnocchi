@@ -42,5 +42,4 @@ class GnocchiSession(object):
                        covarPath=None, covarNames=None):
         phenoMap = self.__jgs.loadPhenotypes(phenotypesPath, primaryID, phenoName,
                                           delimited, covarPath, covarNames)
-
         return PhenotypeMap(phenoMap, self._sc, self.__jgs)
