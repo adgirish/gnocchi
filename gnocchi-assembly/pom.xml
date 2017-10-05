@@ -112,8 +112,9 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>org.bdgenomics.gnocchi</groupId>
-      <artifactId>gnocchi-cli_${scala.version.prefix}</artifactId>
+      <groupId>net.fnothaft.gnocchi</groupId>
+      <artifactId>gnocchi-cli_2.10</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

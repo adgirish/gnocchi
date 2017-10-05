@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from org.bdgenomics.gnocchi.rdd import CalledVariantDataset, PhenotypeMap
+from bdgenomics.gnocchi.rdd import CalledVariantDataset, PhenotypeMap
 
 class GnocchiSession(object):
     """
