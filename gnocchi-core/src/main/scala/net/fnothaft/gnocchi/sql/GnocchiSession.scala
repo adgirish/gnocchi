@@ -2,6 +2,11 @@ package net.fnothaft.gnocchi.sql
 
 import java.io.Serializable
 
+<<<<<<< HEAD
+=======
+import net.fnothaft.gnocchi.models.variant.VariantModel
+import net.fnothaft.gnocchi.models.variant.linear.AdditiveLinearVariantModel
+import net.fnothaft.gnocchi.models.{ GnocchiModel, GnocchiModelMetaData }
 import org.bdgenomics.formats.avro.GenotypeAllele
 import net.fnothaft.gnocchi.primitives.genotype.GenotypeState
 import net.fnothaft.gnocchi.primitives.phenotype.Phenotype
