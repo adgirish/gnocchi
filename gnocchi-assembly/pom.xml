@@ -121,5 +121,11 @@
       <artifactId>gnocchi-apis.10</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>net.fnothaft.gnocchi</groupId>
+      <artifactId>gnocchi-apis.10</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>
