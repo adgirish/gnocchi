@@ -2,8 +2,6 @@ package net.fnothaft.gnocchi.sql
 
 import java.io.Serializable
 
-<<<<<<< HEAD
-=======
 import net.fnothaft.gnocchi.models.variant.VariantModel
 import net.fnothaft.gnocchi.models.variant.linear.AdditiveLinearVariantModel
 import net.fnothaft.gnocchi.models.{ GnocchiModel, GnocchiModelMetaData }
