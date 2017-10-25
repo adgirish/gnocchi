@@ -27,15 +27,15 @@ import org.apache.spark.sql.Dataset
 import org.scalatest.FunSuite // (TODO) Replace with GnocchiFunSuite
 
 class JavaGnocchiSessionSuite extends GnocchiFunSuite {
-  sparkTest("Creating JavaGnocchiSession") {
-    val gs = new GnocchiSession(sc)
-    val jgs = new JavaGnocchiSession(gs)
+  var gs:GnocchiSession = null
+  var jgs:JavaGnocchiSession = null
+
+  sparkBefore("Creating JavaGnocchiSession") {
+    gs = Mockito.mock(classOf[GnocchiSession])
+    jgs = new JavaGnocchiSession(gs)
   }
 
   sparkTest("Verify filterSamples makes correct call to GnocchiSession") {
-    val gs = Mockito.mock(classOf[GnocchiSession])
-    val jgs = new JavaGnocchiSession(gs)
-
     val mockGenotype = Mockito.mock(classOf[Dataset[CalledVariant]])
     val mockMind = 0.0
     val mockPloidy = 0.0
@@ -43,5 +43,42 @@ class JavaGnocchiSessionSuite extends GnocchiFunSuite {
     jgs.filterSamples(mockGenotype, mockMind, mockPloidy)
 
     Mockito.verify(gs).filterSamples(mockGenotype, mockMind, mockPloidy)
+  }
+
+  sparkTest("Verify filterVariants makes correct call to GnocchiSession") {
+    val mockGenotype = Mockito.mock(classOf[Dataset[CalledVariant]])
+    val mockGeno = 0.0
+    val mockMaf = 0.0
+
+    jgs.filterVariants(mockGenotype, mockGeno, mockMaf)
+
+    Mockito.verify(gs).filterVariants(mockGenotype, mockGeno, mockMaf)
+  }
+
+  sparkTest("Verify recodeMajorAllele makes correct call to Gnocchi Sesssion") {
+    val mockGenotype = Mockito.mock(classOf[Dataset[CalledVariant]])
+
+    jgs.recodeMajorAllele(mockGenotype)
+
+    Mockito.verify(gs).recodeMajorAllele(mockGenotype)
+  }
+
+  sparkTest("Verify loadGenotypes makes correct call to Gnocchi Sesssion") {
+    val mockGeno = ""
+
+    jgs.loadGenotypes(mockGeno)
+
+    Mockito.verify(gs).loadGenotypes(mockGeno)
+  }
+
+  sparkTest("Verify loadPhenotypes makes correct call to Gnocchi Sesssion") {
+    val mockPhenotypesPath = ""
+    val mockPrimaryID = ""
+    val mockPhenoName = ""
+    val mockDelimiter = ""
+
+    jgs.loadPhenotypes(mockPhenotypesPath, mockPrimaryID, mockPhenoName, mockDelimiter)
+
+    Mockito.verify(gs).loadPhenotypes(mockPhenotypesPath, mockPrimaryID, mockPhenoName, mockDelimiter, None, None, "\t",  List(-9))
   }
 }
