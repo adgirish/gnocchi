@@ -33,9 +33,9 @@ class LinearGnocchiModel(object):
             phenotypes,
             phenotypeNames,
             QCVariantIDs,
-            QCVariantSamplingRate = 0.1,
-            allelicAssumption = "ADDITIVE",
-            validationStringency = "STRICT"):
+            QCVariantSamplingRate=0.1,
+            allelicAssumption="ADDITIVE",
+            validationStringency="STRICT"):
 
         sc = ss.sparkContext
         jvm = sc._jvm
