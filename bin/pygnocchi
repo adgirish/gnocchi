@@ -19,10 +19,6 @@
 
 set -e
 
-# Configure Jupyter notebook runnning
-export PYSPARK_DRIVER_PYTHON=jupyter
-export PYSPARK_DRIVER_PYTHON_OPTS='notebook'
-
 # Figure out where Gnocchi is installed
 SCRIPT_DIR="$(cd `dirname $0`/..; pwd)"
 
