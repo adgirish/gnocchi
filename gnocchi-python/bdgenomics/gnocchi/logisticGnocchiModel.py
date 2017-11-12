@@ -14,40 +14,52 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from bdgenomics.gnocchi.primitives import CalledVariantDataset, PhenotypeMap, LogisticVariantModelDataset
+from bdgenomics.gnocchi.primitives import CalledVariantDataset, LogisticVariantModelDataset
 from py4j.java_collections import ListConverter
 
 class LogisticGnocchiModel(object):
 
-    def __init__(self, ss,
-                 genotypes,
-                 phenotypes,
-                 phenotypeNames,
-                 QCVariantIDs,
-                 QCVariantSamplingRate = 0.1,
-                 allelicAssumption = "ADDITIVE",
-                 validationStringency = "STRICT"):
+    def __init__(self, ss, jlgm):
+        self._ss = ss
         self._sc = ss.sparkContext
         self._jvm = self._sc._jvm
-        session = self._jvm.org.bdgenomics.gnocchi.sql.GnocchiSession.GnocchiSessionFromSession(ss._jsparkSession)
-        self.__jlgmf = self._jvm.org.bdgenomics.gnocchi.api.java.JavaLogisticGnocchiModelFactory
-        self.__jlgmf.generate(session)
+        self._jlgm = jlgm
 
-        self.__lgm = self.__jlgmf.apply(genotypes,
-               phenotypes,
-                ListConverter().convert(phenotypeNames, self._sc._gateway._gateway_client),
-                ListConverter().convert(QCVariantIDs, self._sc._gateway._gateway_client),
-               QCVariantSamplingRate,
-               allelicAssumption,
-               validationStringency)
+    @classmethod
+    def New(cls,
+            ss,
+            genotypes,
+            phenotypes,
+            phenotypeNames,
+            QCVariantIDs,
+            QCVariantSamplingRate=0.1,
+            allelicAssumption="ADDITIVE",
+            validationStringency="STRICT"):
 
-        self.__jlgm = self._jvm.org.bdgenomics.gnocchi.api.java.JavaLogisticGnocchiModel(self.__lgm)
+        sc = ss.sparkContext
+        jvm = sc._jvm
+        jlgmf = jvm.org.bdgenomics.gnocchi.api.java.JavaLogisticGnocchiModelFactory
+        session = jvm.org.bdgenomics.gnocchi.sql.GnocchiSession.GnocchiSessionFromSession(ss._jsparkSession)
+        jlgmf.generate(session)
+
+        lgm = jlgmf.apply(genotypes.get(),
+                          phenotypes.get(),
+                          ListConverter().convert(phenotypeNames, sc._gateway._gateway_client),
+                          ListConverter().convert(QCVariantIDs, sc._gateway._gateway_client),
+                          QCVariantSamplingRate,
+                          allelicAssumption,
+                          validationStringency)
+
+        jlgm = jvm.org.bdgenomics.gnocchi.api.java.JavaLogisticGnocchiModel(lgm)
+
+        return cls(ss, jlgm)
 
     def get(self):
         return self.__jlgm
 
     def mergeGnocchiModel(self, otherModel):
-        return self.__jlgm.mergeGnocchiModel(otherModel.get())
+        newModel = self.__jlgm.mergeGnocchiModel(otherModel.get())
+        return LogisticGnocchiModel(self._ss, newModel)
 
     def mergeVariantModels(self, newVariantModels):
         dataset = self.__jlgm.mergeVariantModels(newVariantModels)
@@ -56,4 +68,3 @@ class LogisticGnocchiModel(object):
     def mergeQCVariants(self, newQCVariantModels):
         dataset = self.__jlgm.mergeQCVariants(newQCVariantModels)
         return CalledVariantDataset(dataset, self._sc)
-

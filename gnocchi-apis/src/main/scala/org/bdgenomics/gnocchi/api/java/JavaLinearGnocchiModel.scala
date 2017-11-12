@@ -50,8 +50,9 @@ object JavaLinearGnocchiModelFactory {
 }
 
 class JavaLinearGnocchiModel(val lgm: LinearGnocchiModel) {
-  def mergeGnocchiModel(otherModel: JavaLinearGnocchiModel): GnocchiModel[LinearVariantModel, LinearGnocchiModel] = {
-    lgm.mergeGnocchiModel(otherModel.lgm)
+  def mergeGnocchiModel(otherModel: JavaLinearGnocchiModel): JavaLinearGnocchiModel = {
+    val newModel = lgm.mergeGnocchiModel(otherModel.lgm)
+    JavaLinearGnocchiModel(newModel)
   }
 
   def mergeVariantModels(newVariantModels: Dataset[LinearVariantModel]): Dataset[LinearVariantModel] = {

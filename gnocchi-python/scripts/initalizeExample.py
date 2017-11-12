@@ -10,18 +10,17 @@ gs = GnocchiSession(spark)
 genos = gs.loadGenotypes(genotypesPath1)
 phenos = gs.loadPhenotypes(phenotypesPath1, "IID", "pheno_1", "\t")
 
-lgm = LinearGnocchiModel(spark, genos.get(), phenos.get(), ["AD"], ["GI"])
-lgm2 = LinearGnocchiModel(spark, genos.get(), phenos.get(), ["AD"], ["GI"])
+lgm = LinearGnocchiModel.New(spark, genos, phenos, ["AD"], ["GI"])
+lgm2 = LinearGnocchiModel.New(spark, genos, phenos, ["AD"], ["GI"])
 
 
 lgm.mergeGnocchiModel(lgm2)
 
-logm = LogisticGnocchiModel(spark, genos.get(), phenos.get(), ["AD"], ["GI"])
-logm2 = LogisticGnocchiModel(spark, genos.get(), phenos.get(), ["AD"], ["GI"])
+logm = LogisticGnocchiModel.New(spark, genos, phenos, ["AD"], ["GI"])
+logm2 = LogisticGnocchiModel.New(spark, genos, phenos, ["AD"], ["GI"])
 
 
 logm.mergeGnocchiModel(lgm2)
 
-from bdgenomics.gnocchi.regressPhenotypes import RegressPhenotypes
 rp = RegressPhenotypes(spark)
 rp.apply("../examples/testData/1snp10samples.vcf ../examples/testData/10samples1Phenotype.txt ADDITIVE_LINEAR ../examples/testData/DELETEME -saveAsText -sampleIDName SampleID -phenoName pheno1 -overwriteParquet")
