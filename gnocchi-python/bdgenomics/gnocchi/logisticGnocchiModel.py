@@ -31,7 +31,7 @@ class LogisticGnocchiModel(object):
             genotypes,
             phenotypes,
             phenotypeNames,
-            QCVariantIDs,
+            QCVariantIDs=None,
             QCVariantSamplingRate=0.1,
             allelicAssumption="ADDITIVE",
             validationStringency="STRICT"):
@@ -42,10 +42,15 @@ class LogisticGnocchiModel(object):
         session = jvm.org.bdgenomics.gnocchi.sql.GnocchiSession.GnocchiSessionFromSession(ss._jsparkSession)
         jlgmf.generate(session)
 
+        if phenotypeNames:
+            phenotypeNames = ListConverter().convert(phenotypeNames, sc._gateway._gateway_client)
+        if QCVariantIDs:
+            QCVariantIDs = ListConverter().convert(QCVariantIDs, sc._gateway._gateway_client)
+
         lgm = jlgmf.apply(genotypes.get(),
                           phenotypes.get(),
-                          ListConverter().convert(phenotypeNames, sc._gateway._gateway_client),
-                          ListConverter().convert(QCVariantIDs, sc._gateway._gateway_client),
+                          phenotypeNames,
+                          QCVariantIDs,
                           QCVariantSamplingRate,
                           allelicAssumption,
                           validationStringency)
@@ -62,9 +67,41 @@ class LogisticGnocchiModel(object):
         return LogisticGnocchiModel(self._ss, newModel)
 
     def mergeVariantModels(self, newVariantModels):
-        dataset = self.__jlgm.mergeVariantModels(newVariantModels)
+        dataset = self.__jlgm.mergeVariantModels(newVariantModels.get())
         return LogisticVariantModelDataset(dataset, self._sc)
 
     def mergeQCVariants(self, newQCVariantModels):
-        dataset = self.__jlgm.mergeQCVariants(newQCVariantModels)
+        dataset = self.__jlgm.mergeQCVariants(newQCVariantModels.get())
         return CalledVariantDataset(dataset, self._sc)
+
+    def getVariantModels(self):
+        dataset = self._jlgm.getVariantModels()
+        return LogisticVariantModelDataset(dataset, self._sc)
+
+    def getQCVariants(self):
+        dataset = self._jlgm.getQCVariants()
+        return CalledVariantDataset(dataset, self._sc)
+
+    def getModelMetadata(self):
+        return self._jlgm.getModelMetadata()
+    
+    def getModelType(self):
+        return self._jlgm.getModelType()
+    
+    def getPhenotype(self):
+        return self._jlgm.getPhenotype()
+    
+    def getCovariates(self):
+        return self._jlgm.getCovariates()
+    
+    def getNumSamples(self):
+        return self._jlgm.getNumSamples()
+    
+    def getHaplotypeBlockErrorThreshold(self):
+        return self._jlgm.getHaplotypeBlockErrorThreshold()
+    
+    def getFlaggedVariantModels(self):
+        return self._jlgm.getFlaggedVariantModels()
+        
+    def save(self, saveTo):
+        self._jlgm.save(saveTo)

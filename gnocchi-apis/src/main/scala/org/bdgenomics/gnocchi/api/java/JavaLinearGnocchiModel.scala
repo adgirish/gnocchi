@@ -3,7 +3,7 @@ package org.bdgenomics.gnocchi.api.java
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.Dataset
 import org.bdgenomics.gnocchi.models.variant.{ QualityControlVariantModel, LinearVariantModel }
-import org.bdgenomics.gnocchi.models.{ LinearGnocchiModelFactory, GnocchiModel, LinearGnocchiModel }
+import org.bdgenomics.gnocchi.models.{ LinearGnocchiModelFactory, GnocchiModel, LinearGnocchiModel, GnocchiModelMetaData }
 import org.bdgenomics.gnocchi.primitives.phenotype.Phenotype
 import org.bdgenomics.gnocchi.primitives.variants.CalledVariant
 import org.bdgenomics.gnocchi.sql.GnocchiSession
@@ -63,7 +63,43 @@ class JavaLinearGnocchiModel(val lgm: LinearGnocchiModel) {
     lgm.mergeQCVariants(newQCVariantModels)
   }
 
-  def save(saveTo: java.lang.String) = {
-    // (TODO) Fill out serialization
+  def getVariantModels(): Dataset[LinearVariantModel] = {
+    lgm.variantModels
+  }
+
+  def getQCVariants(): Dataset[QualityControlVariantModel[LinearVariantModel]] = {
+    lgm.QCVariantModels
+  }
+
+  def getModelMetadata(): GnocchiModelMetaData = {
+    lgm.metaData
+  }
+
+  def getModelType(): java.lang.String = {
+    lgm.metaData.modelType
+  }
+
+  def getPhenotype(): java.lang.String = {
+    lgm.metaData.phenotype
+  }
+
+  def getCovariates(): java.lang.String = {
+    lgm.metaData.covariates
+  }
+
+  def getNumSamples(): java.lang.Integer = {
+    lgm.metaData.numSamples
+  }
+
+  def getHaplotypeBlockErrorThreshold(): java.lang.Double = {
+    lgm.metaData.haplotypeBlockErrorThreshold
+  }
+
+  def getFlaggedVariantModels(): java.util.List[java.lang.String] = {
+    lgm.metaData.flaggedVariantModels.getOrElse(null)
+  }
+
+  def save(saveTo: java.lang.String): Unit = {
+    lgm.save(saveTo)
   }
 }
